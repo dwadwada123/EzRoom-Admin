@@ -44,7 +44,7 @@ Sau khi chạy thành công, terminal sẽ hiển thị địa chỉ local (thư
 
 ---
 
-## Thông Tin Tài Khoản Thử Nghiệm (Test Accounts)
+## Thông Tin Tài Khoản Thử Nghiệm
 
 Khi truy cập vào trang Web Admin lần đầu tiên, hệ thống bảo vệ Token sẽ yêu cầu đăng nhập. Bạn có thể sử dụng một trong hai tài khoản mẫu dưới đây để kiểm thử:
 
