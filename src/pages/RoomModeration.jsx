@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Tabs, Table, Modal, Input, Badge, message } from "antd";
+import { Tabs, Table, Modal, Input, Badge, Select, message } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
 
 // Moderation datasets
 const initialPendingData = [
@@ -14,7 +15,13 @@ const initialPendingData = [
     structure: "SINGLE",
     floorArea: 30,
     mezzanineArea: 10,
-    amenities: ["WiFi", "Điều hòa", "Máy giặt", "Nóng lạnh", "Tủ quần áo"]
+    amenities: [
+      { name: "WiFi", compensationAmount: 500000 },
+      { name: "Điều hòa", compensationAmount: 1000000 },
+      { name: "Máy giặt", compensationAmount: 1500000 },
+      { name: "Nóng lạnh", compensationAmount: 800000 },
+      { name: "Tủ quần áo", compensationAmount: 1200000 }
+    ]
   },
   {
     id: "p2",
@@ -27,7 +34,12 @@ const initialPendingData = [
     structure: "APARTMENT",
     floorArea: 25,
     mezzanineArea: 0,
-    amenities: ["WiFi", "Điều hòa", "Thang máy", "Khóa vân tay"]
+    amenities: [
+      { name: "WiFi", compensationAmount: 500000 },
+      { name: "Điều hòa", compensationAmount: 1000000 },
+      { name: "Thang máy", compensationAmount: 0 },
+      { name: "Khóa vân tay", compensationAmount: 1500000 }
+    ]
   },
   {
     id: "p3",
@@ -40,7 +52,14 @@ const initialPendingData = [
     structure: "WHOLE",
     floorArea: 75,
     mezzanineArea: 25,
-    amenities: ["WiFi", "Điều hòa", "Máy giặt", "Tủ lạnh", "Bếp nấu", "Chỗ để xe"]
+    amenities: [
+      { name: "WiFi", compensationAmount: 500000 },
+      { name: "Điều hòa", compensationAmount: 1000000 },
+      { name: "Máy giặt", compensationAmount: 1500000 },
+      { name: "Tủ lạnh", compensationAmount: 2000000 },
+      { name: "Bếp nấu", compensationAmount: 500000 },
+      { name: "Chỗ để xe", compensationAmount: 0 }
+    ]
   }
 ];
 
@@ -52,13 +71,18 @@ const initialReportedData = [
     price: "6.000.000 VND / tháng",
     address: "Tây Hồ, Hà Nội",
     reporterName: "Nguyễn Minh Anh",
-    reason: "Sai lệch thông tin thực tế",
+    reason: "Thông tin ảo",
     description: "Căn hộ chung cư mini thực tế không có view hồ và diện tích nhỏ hơn nhiều so với hình ảnh quảng cáo.",
     imageUrl: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&q=80&w=600",
     structure: "APARTMENT",
     floorArea: 45,
     mezzanineArea: 0,
-    amenities: ["WiFi", "Điều hòa", "Thang máy", "Bể bơi"]
+    amenities: [
+      { name: "WiFi", compensationAmount: 500000 },
+      { name: "Điều hòa", compensationAmount: 1000000 },
+      { name: "Thang máy", compensationAmount: 0 },
+      { name: "Bể bơi", compensationAmount: 0 }
+    ]
   },
   {
     id: "r2",
@@ -67,13 +91,16 @@ const initialReportedData = [
     price: "1.200.000 VND / tháng",
     address: "Thủ Đức, TP. Hồ Chí Minh",
     reporterName: "Phạm Hữu Nghĩa",
-    reason: "Địa chỉ ảo/Lừa đảo tiền cọc",
+    reason: "Lừa đảo tiền cọc",
     description: "Yêu cầu chuyển khoản đặt cọc giữ phòng trước khi đến xem, sau khi cọc thì chủ nhà khóa số điện thoại.",
     imageUrl: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=600",
     structure: "SINGLE",
     floorArea: 15,
     mezzanineArea: 5,
-    amenities: ["WiFi", "Quạt điện"]
+    amenities: [
+      { name: "WiFi", compensationAmount: 500000 },
+      { name: "Quạt điện", compensationAmount: 200000 }
+    ]
   },
   {
     id: "r3",
@@ -82,13 +109,19 @@ const initialReportedData = [
     price: "12.000.000 VND / tháng",
     address: "Quận 10, TP. Hồ Chí Minh",
     reporterName: "Bùi Thị Minh",
-    reason: "Phòng trọ đã cho thuê nhưng không gỡ",
+    reason: "Phòng đã cho thuê",
     description: "Gọi điện hỏi phòng chủ nhà báo đã cho thuê từ 1 tháng trước nhưng bài viết vẫn hiển thị và đẩy tin liên tục.",
     imageUrl: "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&q=80&w=600",
     structure: "WHOLE",
     floorArea: 90,
     mezzanineArea: 30,
-    amenities: ["WiFi", "Điều hòa", "Máy giặt", "Sân thượng", "Gara ô tô"]
+    amenities: [
+      { name: "WiFi", compensationAmount: 500000 },
+      { name: "Điều hòa", compensationAmount: 1000000 },
+      { name: "Máy giặt", compensationAmount: 1500000 },
+      { name: "Sân thượng", compensationAmount: 0 },
+      { name: "Gara ô tô", compensationAmount: 0 }
+    ]
   }
 ];
 
@@ -100,6 +133,25 @@ function RoomModeration() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [modalSource, setModalSource] = useState(""); // "pending" or "reported"
   const [actionReason, setActionReason] = useState("");
+
+  // Search query and room structure filter states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [structureFilter, setStructureFilter] = useState("ALL");
+
+  // Filter list dynamically by query search and structural config
+  const getFilteredList = (list) => {
+    return list.filter((item) => {
+      const matchSearch =
+        !searchQuery.trim() ||
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.address.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchStructure = structureFilter === "ALL" || item.structure === structureFilter;
+      return matchSearch && matchStructure;
+    });
+  };
+
+  const filteredPendingData = getFilteredList(pendingData);
+  const filteredReportedData = getFilteredList(reportedData);
 
   // Open modal handler
   const handleOpenModal = (item, source) => {
@@ -238,14 +290,14 @@ function RoomModeration() {
         <span className="flex items-center gap-2">
           Chờ kiểm duyệt
           <Badge
-            count={pendingData.length}
+            count={filteredPendingData.length}
             style={{ backgroundColor: "#FF6F43" }}
           />
         </span>
       ),
       children: (
         <Table
-          dataSource={pendingData}
+          dataSource={filteredPendingData}
           columns={pendingColumns}
           rowKey="id"
           pagination={{ pageSize: 5 }}
@@ -258,14 +310,14 @@ function RoomModeration() {
         <span className="flex items-center gap-2">
           Bị báo cáo vi phạm
           <Badge
-            count={reportedData.length}
+            count={filteredReportedData.length}
             style={{ backgroundColor: "#FF4D4F" }}
           />
         </span>
       ),
       children: (
         <Table
-          dataSource={reportedData}
+          dataSource={filteredReportedData}
           columns={reportedColumns}
           rowKey="id"
           pagination={{ pageSize: 5 }}
@@ -285,6 +337,38 @@ function RoomModeration() {
         <p className="text-sm text-onBackgroundLight/40">
           Phê duyệt tin đăng mới và xử lý khiếu nại báo cáo vi phạm từ người thuê
         </p>
+      </div>
+
+      {/* Filtering toolbar */}
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4 bg-backgroundLight p-4 rounded-xl border border-onBackgroundLight/5">
+        {/* Search text query input */}
+        <div className="flex flex-col gap-1.5 text-left">
+          <span className="text-xs font-semibold text-onBackgroundLight/50">TÌM KIẾM BÀI ĐĂNG</span>
+          <Input
+            prefix={<SearchOutlined className="text-onBackgroundLight/30" />}
+            placeholder="Tìm theo tiêu đề hoặc địa chỉ..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="rounded-lg"
+            allowClear
+          />
+        </div>
+
+        {/* Structure type filter */}
+        <div className="flex flex-col gap-1.5 text-left">
+          <span className="text-xs font-semibold text-onBackgroundLight/50">CẤU TRÚC PHÒNG</span>
+          <Select
+            value={structureFilter}
+            onChange={(value) => setStructureFilter(value)}
+            options={[
+              { value: "ALL", label: "Tất cả loại phòng" },
+              { value: "SINGLE", label: "Phòng đơn (SINGLE)" },
+              { value: "WHOLE", label: "Nguyên căn (WHOLE)" },
+              { value: "APARTMENT", label: "Căn hộ (APARTMENT)" }
+            ]}
+            className="w-full"
+          />
+        </div>
       </div>
 
       {/* Active tabs wrapper */}
@@ -384,7 +468,7 @@ function RoomModeration() {
                     key={idx}
                     className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orangePrimary/10 text-orangePrimary"
                   >
-                    {amenity}
+                    {amenity.name} (Đền bù: {new Intl.NumberFormat("vi-VN").format(amenity.compensationAmount)} đ)
                   </span>
                 ))}
               </div>

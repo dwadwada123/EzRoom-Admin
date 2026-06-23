@@ -117,6 +117,7 @@ function ContractManagement() {
       dataIndex: "depositStatus",
       key: "depositStatus",
       render: (status) => {
+        // Check deposit status in uppercase format
         if (status === "PAID") {
           return <Tag color="#00BFA5">Đã đóng cọc</Tag>;
         }
