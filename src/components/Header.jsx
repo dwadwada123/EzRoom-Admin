@@ -25,20 +25,20 @@ function Header({ activeTab, onLogout }) {
   };
 
   return (
-    // Header container
-    <header className="h-16 bg-surfaceLight shadow-sm flex items-center justify-between px-6 z-10 flex-shrink-0">
+    // Sticky frosted glass header
+    <header className="sticky top-0 w-full h-16 bg-surfaceLight/80 backdrop-blur-md border-b border-onBackgroundLight/5 flex items-center justify-between px-6 z-20 transition-all duration-300">
       {/* Active tab title */}
-      <h2 className="text-lg font-bold text-onBackgroundLight tracking-wide">
+      <h2 className="text-base font-bold text-onBackgroundLight tracking-wider">
         {getHeaderTitle(activeTab)}
       </h2>
 
       {/* User profile and actions */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-3">
-          {/* User avatar */}
-          <div className="w-9 h-9 rounded-full bg-orangePrimary/10 flex items-center justify-center overflow-hidden">
+          {/* User squircle avatar */}
+          <div className="w-9 h-9 rounded-xl bg-techBluePrimary/10 flex items-center justify-center overflow-hidden border border-techBluePrimary/20 shadow-[0_2px_8px_rgba(2,132,199,0.08)]">
             <svg
-              className="w-6 h-6 text-orangePrimary"
+              className="w-5 h-5 text-techBluePrimary"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -55,25 +55,25 @@ function Header({ activeTab, onLogout }) {
 
           {/* User info */}
           <div className="flex flex-col text-left">
-            <span className="text-sm font-semibold text-onBackgroundLight">
+            <span className="text-xs font-bold text-onBackgroundLight tracking-wide">
               Trần Vũ Phong
             </span>
-            <span className="text-xs text-onBackgroundLight/50">
+            <span className="text-[10px] text-onBackgroundLight/40 font-medium">
               Quản trị viên
             </span>
           </div>
         </div>
 
         {/* Divider */}
-        <div className="w-[1px] h-6 bg-onBackgroundLight/10" />
+        <div className="w-[1px] h-5 bg-onBackgroundLight/10" />
 
         {/* Logout button */}
         <button
           onClick={onLogout}
-          className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-150"
+          className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-300 active:scale-95"
           title="Đăng xuất"
         >
-          <LogoutOutlined className="text-lg" />
+          <LogoutOutlined className="text-base" />
         </button>
       </div>
     </header>

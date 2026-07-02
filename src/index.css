@@ -1,4 +1,131 @@
-/* Tailwind directives */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    color: #0F172A;
+    background-color: #F8FAFC;
+  }
+}
+
+/* Premium Ant Design Table Customizations - Floating Rows Style */
+.custom-premium-table .ant-table {
+  background: transparent !important;
+}
+
+.custom-premium-table .ant-table-container {
+  background: transparent !important;
+}
+
+.custom-premium-table .ant-table-container table {
+  border-collapse: separate !important;
+  border-spacing: 0 8px !important;
+}
+
+.custom-premium-table .ant-table-thead > tr > th {
+  background: transparent !important;
+  color: rgba(15, 23, 42, 0.5) !important;
+  font-weight: 600 !important;
+  font-size: 11px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  border-bottom: none !important;
+  padding: 8px 16px !important;
+}
+
+.custom-premium-table .ant-table-tbody > tr {
+  background: #ffffff !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.custom-premium-table .ant-table-tbody > tr > td {
+  background: #ffffff !important;
+  border-top: 1px solid #f1f5f9 !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  padding: 14px 16px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.custom-premium-table .ant-table-tbody > tr > td:first-child {
+  border-left: 1px solid #f1f5f9 !important;
+  border-top-left-radius: 12px !important;
+  border-bottom-left-radius: 12px !important;
+}
+
+.custom-premium-table .ant-table-tbody > tr > td:last-child {
+  border-right: 1px solid #f1f5f9 !important;
+  border-top-right-radius: 12px !important;
+  border-bottom-right-radius: 12px !important;
+}
+
+.custom-premium-table .ant-table-tbody > tr:hover {
+  transform: translateX(4px);
+}
+
+.custom-premium-table .ant-table-tbody > tr:hover > td {
+  background: rgba(2, 132, 199, 0.03) !important; /* bg-techBluePrimary/3 */
+}
+
+/* AntD Pagination Style Upgrades */
+.custom-premium-table .ant-pagination .ant-pagination-item {
+  border-radius: 8px !important;
+  border-color: rgba(15, 23, 42, 0.08) !important;
+  transition: all 0.2s ease !important;
+}
+.custom-premium-table .ant-pagination .ant-pagination-item-active {
+  border-color: #0284C7 !important;
+  background-color: #0284C7 !important;
+}
+.custom-premium-table .ant-pagination .ant-pagination-item-active a {
+  color: #FFFFFF !important;
+}
+.custom-premium-table .ant-pagination .ant-pagination-prev .ant-pagination-item-link,
+.custom-premium-table .ant-pagination .ant-pagination-next .ant-pagination-item-link {
+  border-radius: 8px !important;
+}
+
+/* AntD Tabs Style Upgrades */
+.custom-tabs .ant-tabs-nav::before {
+  border-bottom: 1px solid rgba(15, 23, 42, 0.05) !important;
+}
+.custom-tabs .ant-tabs-tab-btn {
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  transition: color 0.3s ease !important;
+}
+.custom-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #0284C7 !important;
+}
+.custom-tabs .ant-tabs-ink-bar {
+  background: #0284C7 !important;
+  height: 3px !important;
+  border-radius: 3px 3px 0 0 !important;
+}
+
+/* Custom Input and Select Global Focus States */
+.ant-input-affine-wrapper, .ant-input {
+  border-color: rgba(15, 23, 42, 0.08) !important;
+  transition: all 0.2s ease !important;
+}
+.ant-input-affine-wrapper:focus-within, .ant-input:focus {
+  border-color: #0284C7 !important;
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.1) !important;
+}
+.ant-select .ant-select-selector {
+  border-color: rgba(15, 23, 42, 0.08) !important;
+  transition: all 0.2s ease !important;
+}
+.ant-select-focused .ant-select-selector {
+  border-color: #0284C7 !important;
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.1) !important;
+}
+.ant-tag {
+  border-radius: 6px !important;
+  font-weight: 500 !important;
+  padding: 2px 8px !important;
+  border: none !important;
+}

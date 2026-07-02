@@ -119,20 +119,20 @@ function ContractManagement() {
       render: (status) => {
         // Check deposit status in uppercase format
         if (status === "PAID") {
-          return <Tag color="#00BFA5">Đã đóng cọc</Tag>;
+          return <Tag color="#10B981">Đã đóng cọc</Tag>;
         }
-        return <Tag color="#FF6F43">Chờ đóng cọc</Tag>;
+        return <Tag color="#0284C7">Chờ đóng cọc</Tag>;
       },
     },
   ];
 
   return (
     // Contract layout container
-    <div className="bg-surfaceLight rounded-xl p-6 shadow-sm border border-onBackgroundLight/5">
-      {/* Title section */}
-      <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="bg-surfaceLight/80 backdrop-blur-md rounded-2xl p-6 border border-onBackgroundLight/5 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+      {/* Toolbar flex row */}
+      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-[0_2px_12px_rgba(15,23,42,0.02)]">
         <div>
-          <h3 className="text-lg font-bold text-onBackgroundLight">
+          <h3 className="text-lg font-bold text-onBackgroundLight tracking-wide">
             QUẢN LÝ HỢP ĐỒNG ĐIỆN TỬ
           </h3>
           <p className="text-sm text-onBackgroundLight/40">
@@ -145,7 +145,7 @@ function ContractManagement() {
             placeholder="Tìm theo tên khách thuê hoặc tên phòng..."
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            className="w-80 rounded-lg"
+            className="w-80 rounded-xl"
             allowClear
           />
         </div>
@@ -158,6 +158,7 @@ function ContractManagement() {
           columns={columns}
           rowKey="id"
           pagination={{ pageSize: 5 }}
+          className="custom-premium-table"
         />
       </div>
     </div>

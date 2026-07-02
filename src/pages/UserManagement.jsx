@@ -10,7 +10,9 @@ const initialUsers = [
     email: "levantam@gmail.com",
     phone: "0901 234 567",
     role: "HOST",
-    status: "ACTIVE"
+    status: "ACTIVE",
+    isEkycVerified: true,
+    creditScore: 4.8
   },
   {
     id: "u2",
@@ -18,7 +20,9 @@ const initialUsers = [
     email: "hoanguyen@yahoo.com",
     phone: "0938 888 999",
     role: "RENTER",
-    status: "ACTIVE"
+    status: "ACTIVE",
+    isEkycVerified: false,
+    creditScore: 4.5
   },
   {
     id: "u3",
@@ -27,7 +31,9 @@ const initialUsers = [
     phone: "0977 123 456",
     role: "HOST",
     status: "LOCKED",
-    lockReason: "Đăng tải thông tin phòng trọ giả mạo"
+    lockReason: "Đăng tải thông tin phòng trọ giả mạo",
+    isEkycVerified: true,
+    creditScore: 2.1
   },
   {
     id: "u4",
@@ -35,7 +41,9 @@ const initialUsers = [
     email: "thuyhang@gmail.com",
     phone: "0912 987 654",
     role: "RENTER",
-    status: "ACTIVE"
+    status: "ACTIVE",
+    isEkycVerified: true,
+    creditScore: 4.9
   },
   {
     id: "u5",
@@ -43,7 +51,9 @@ const initialUsers = [
     email: "quocanh.vu@gmail.com",
     phone: "0989 333 444",
     role: "HOST",
-    status: "ACTIVE"
+    status: "ACTIVE",
+    isEkycVerified: false,
+    creditScore: 3.8
   }
 ];
 
@@ -54,6 +64,7 @@ function UserManagement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRoleFilter, setSelectedRoleFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [ekycFilter, setEkycFilter] = useState("ALL");
 
   // Lock confirmation modal handlers
   const [isLockModalOpen, setIsLockModalOpen] = useState(false);
@@ -126,13 +137,17 @@ function UserManagement() {
   const filteredUsers = users.filter((user) => {
     const matchRole = selectedRoleFilter === "ALL" || user.role === selectedRoleFilter;
     const matchStatus = statusFilter === "ALL" || user.status === statusFilter;
+    const matchEkyc =
+      ekycFilter === "ALL" ||
+      (ekycFilter === "VERIFIED" && user.isEkycVerified) ||
+      (ekycFilter === "UNVERIFIED" && !user.isEkycVerified);
     const matchSearch =
       !searchQuery.trim() ||
       user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.phone.toLowerCase().includes(searchQuery.toLowerCase());
 
-    return matchRole && matchStatus && matchSearch;
+    return matchRole && matchStatus && matchEkyc && matchSearch;
   });
 
   // Table columns definition
@@ -159,10 +174,35 @@ function UserManagement() {
       key: "role",
       render: (role) => {
         if (role === "HOST") {
-          return <Tag color="#FF6F43">Chủ nhà</Tag>;
+          return <Tag color="#0284C7">Chủ nhà</Tag>;
         }
-        return <Tag color="#00BFA5">Người thuê</Tag>;
+        return <Tag color="#10B981">Người thuê</Tag>;
       },
+    },
+    {
+      title: "Xác thực eKYC",
+      dataIndex: "isEkycVerified",
+      key: "isEkycVerified",
+      render: (verified, record) => {
+        if (record.role === "RENTER") {
+          return <span className="text-slate-400 text-xs font-medium">Không yêu cầu</span>;
+        }
+        return verified ? (
+          <Tag color="#10B981">Đã xác minh</Tag>
+        ) : (
+          <Tag color="#FF4D4F">Chưa xác minh</Tag>
+        );
+      },
+    },
+    {
+      title: "Điểm uy tín",
+      dataIndex: "creditScore",
+      key: "creditScore",
+      render: (score) => (
+        <span className={`font-semibold ${score >= 4.0 ? "text-emerald-600" : score >= 3.0 ? "text-amber-500" : "text-red-500"}`}>
+          {score.toFixed(1)} / 5.0
+        </span>
+      ),
     },
     {
       title: "Trạng thái",
@@ -170,7 +210,7 @@ function UserManagement() {
       key: "status",
       render: (status, record) => {
         if (status === "ACTIVE") {
-          return <Tag color="success">Hoạt động</Tag>;
+          return <Tag color="#10B981">Hoạt động</Tag>;
         }
         return (
           <Space direction="vertical" size={1} className="text-left">
@@ -193,7 +233,7 @@ function UserManagement() {
               danger
               onClick={() => handleOpenLockModal(record)}
               size="small"
-              className="rounded-md"
+              className="rounded-xl border-none font-semibold shadow-[0_2px_8px_rgba(239,68,68,0.15)] hover:scale-105 active:scale-95 transition-all duration-300"
             >
               Khóa
             </Button>
@@ -201,7 +241,7 @@ function UserManagement() {
             <Button
               onClick={() => handleOpenUnlockModal(record)}
               size="small"
-              className="rounded-md"
+              className="rounded-xl font-semibold border-techMintAccent text-techMintAccent hover:bg-techMintAccent/5 hover:text-techMintAccent/80 hover:scale-105 active:scale-95 transition-all duration-300"
             >
               Mở khóa
             </Button>
@@ -213,12 +253,12 @@ function UserManagement() {
 
   return (
     // UserManagement layout wrapper
-    <div className="bg-surfaceLight rounded-xl p-6 shadow-sm border border-onBackgroundLight/5">
+    <div className="bg-surfaceLight/80 backdrop-blur-md rounded-2xl p-6 border border-onBackgroundLight/5 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
       {/* Toolbar & Filter Controllers */}
       <div className="mb-6 space-y-4">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h3 className="text-lg font-bold text-onBackgroundLight">
+            <h3 className="text-lg font-bold text-onBackgroundLight tracking-wide">
               QUẢN LÝ TÀI KHOẢN NGƯỜI DÙNG
             </h3>
             <p className="text-sm text-onBackgroundLight/40">
@@ -227,23 +267,21 @@ function UserManagement() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="flex flex-col md:flex-row md:items-center gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-[0_2px_12px_rgba(15,23,42,0.02)]">
           {/* Search bar input */}
-          <div className="flex flex-col gap-1.5 text-left">
-            <span className="text-xs font-semibold text-onBackgroundLight/50">TÌM KIẾM THÀNH VIÊN</span>
+          <div className="flex-grow text-left">
             <Input
               prefix={<SearchOutlined className="text-onBackgroundLight/30" />}
               placeholder="Tìm theo tên, email hoặc SĐT..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="rounded-lg"
+              className="rounded-xl"
               allowClear
             />
           </div>
 
           {/* Role select list */}
-          <div className="flex flex-col gap-1.5 text-left">
-            <span className="text-xs font-semibold text-onBackgroundLight/50">VAI TRÒ THÀNH VIÊN</span>
+          <div className="w-full md:w-48 text-left">
             <Select
               value={selectedRoleFilter}
               onChange={(value) => setSelectedRoleFilter(value)}
@@ -256,9 +294,22 @@ function UserManagement() {
             />
           </div>
 
+          {/* eKYC status filter */}
+          <div className="w-full md:w-48 text-left">
+            <Select
+              value={ekycFilter}
+              onChange={(value) => setEkycFilter(value)}
+              options={[
+                { value: "ALL", label: "Tất cả eKYC" },
+                { value: "VERIFIED", label: "Đã xác minh eKYC" },
+                { value: "UNVERIFIED", label: "Chưa xác minh eKYC" }
+              ]}
+              className="w-full"
+            />
+          </div>
+
           {/* Status select list */}
-          <div className="flex flex-col gap-1.5 text-left">
-            <span className="text-xs font-semibold text-onBackgroundLight/50">TRẠNG THÁI TÀI KHOẢN</span>
+          <div className="w-full md:w-48 text-left">
             <Select
               value={statusFilter}
               onChange={(value) => setStatusFilter(value)}
@@ -280,6 +331,7 @@ function UserManagement() {
           columns={columns}
           rowKey="id"
           pagination={{ pageSize: 5 }}
+          className="custom-premium-table"
         />
       </div>
 
@@ -316,13 +368,13 @@ function UserManagement() {
 
       {/* Unlock confirmation modal dialog */}
       <Modal
-        title={<span className="text-lg font-bold text-tealAccent">XÁC NHẬN MỞ KHÓA TÀI KHOẢN</span>}
+        title={<span className="text-lg font-bold text-techMintAccent">XÁC NHẬN MỞ KHÓA TÀI KHOẢN</span>}
         open={isUnlockModalOpen}
         onCancel={handleCloseUnlockModal}
         onOk={handleConfirmUnlock}
         okText="Mở khóa tài khoản"
         cancelText="Hủy"
-        okButtonProps={{ className: "bg-tealAccent hover:bg-tealAccent/90 border-none" }}
+        okButtonProps={{ className: "bg-techMintAccent hover:bg-techMintAccent/90 border-none" }}
       >
         {userToUnlock && (
           <div className="py-4 text-left">

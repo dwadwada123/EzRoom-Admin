@@ -71,7 +71,7 @@ function AmenityManagement() {
       render: (_, record) => (
         <button
           onClick={() => handleDelete(record.id)}
-          className="text-red-400 hover:text-red-600 transition-colors duration-150 text-sm font-semibold"
+          className="text-red-400 hover:text-red-600 transition-all duration-300 text-sm font-semibold hover:underline hover:scale-105 active:scale-95 inline-block border-none bg-transparent"
         >
           Xóa
         </button>
@@ -81,11 +81,11 @@ function AmenityManagement() {
 
   return (
     // Amenities layout viewport
-    <div className="bg-surfaceLight rounded-xl p-6 shadow-sm border border-onBackgroundLight/5">
-      {/* Title block */}
-      <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="bg-surfaceLight/80 backdrop-blur-md rounded-2xl p-6 border border-onBackgroundLight/5 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+      {/* Toolbar in flex row */}
+      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-[0_2px_12px_rgba(15,23,42,0.02)]">
         <div>
-          <h3 className="text-lg font-bold text-onBackgroundLight">
+          <h3 className="text-lg font-bold text-onBackgroundLight tracking-wide">
             DANH MỤC TIỆN ÍCH DÙNG CHUNG
           </h3>
           <p className="text-sm text-onBackgroundLight/40">
@@ -98,10 +98,10 @@ function AmenityManagement() {
             placeholder="Tìm nhanh tên tiện ích..."
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            className="w-64 rounded-lg"
+            className="w-64 rounded-xl"
             allowClear
           />
-          <Button type="primary" onClick={handleOpenModal} className="rounded-lg">
+          <Button type="primary" onClick={handleOpenModal} className="rounded-xl font-semibold shadow-[0_2px_8px_rgba(2,132,199,0.1)] hover:scale-105 active:scale-95 transition-all duration-300">
             + Thêm tiện ích mới
           </Button>
         </div>
@@ -114,6 +114,7 @@ function AmenityManagement() {
           columns={columns}
           rowKey="id"
           pagination={{ pageSize: 10 }}
+          className="custom-premium-table"
         />
       </div>
 
@@ -125,7 +126,7 @@ function AmenityManagement() {
         onOk={handleAdd}
         okText="Thêm mới"
         cancelText="Hủy"
-        okButtonProps={{ className: "bg-orangePrimary hover:bg-orangeSecondary border-none" }}
+        okButtonProps={{ className: "bg-techBluePrimary hover:bg-techBluePrimary/90 border-none rounded-xl" }}
       >
         <div className="space-y-2 py-4">
           <label className="text-sm font-medium text-onBackgroundLight/70 block">
@@ -135,7 +136,7 @@ function AmenityManagement() {
             placeholder="Ví dụ: Hồ bơi, Bảo vệ 24/7..."
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
-            className="rounded-lg"
+            className="rounded-xl"
           />
         </div>
       </Modal>

@@ -24,13 +24,13 @@ function Login({ onLoginSuccess }) {
     // Centered layout container
     <div className="w-screen h-screen bg-backgroundLight flex items-center justify-center p-4">
       {/* Login box card */}
-      <div className="bg-surfaceLight rounded-2xl shadow-xl p-8 w-full max-w-md border border-onBackgroundLight/5 text-center">
+      <div className="bg-surfaceLight/80 backdrop-blur-md rounded-2xl shadow-2xl p-8 w-full max-w-md border border-onBackgroundLight/5 text-center">
         {/* Header logo section */}
         <div className="mb-8">
-          <h2 className="text-3xl font-extrabold text-orangePrimary tracking-wide">
+          <h2 className="text-3xl font-extrabold text-techBluePrimary tracking-wide drop-shadow-[0_2px_8px_rgba(2,132,199,0.15)]">
             EzRoom Admin
           </h2>
-          <p className="text-sm text-onBackgroundLight/50 mt-1.5">
+          <p className="text-sm text-onBackgroundLight/50 mt-1.5 font-medium">
             Hệ thống quản lý nền tảng cho thuê trọ
           </p>
         </div>
@@ -41,29 +41,29 @@ function Login({ onLoginSuccess }) {
           layout="vertical"
           onFinish={onFinish}
           requiredMark={false}
-          className="text-left"
+          className="text-left font-medium"
         >
           <Form.Item
-            label={<span className="text-sm font-medium text-onBackgroundLight/70">Tài khoản / Email</span>}
+            label={<span className="text-xs font-semibold text-onBackgroundLight/60 uppercase tracking-wider">Tài khoản / Email</span>}
             name="username"
             rules={[{ required: true, message: "Vui lòng nhập tài khoản hoặc email!" }]}
           >
             <Input
               prefix={<UserOutlined className="text-onBackgroundLight/30" />}
               placeholder="Nhập tên đăng nhập..."
-              className="rounded-lg py-2"
+              className="rounded-xl py-2"
             />
           </Form.Item>
 
           <Form.Item
-            label={<span className="text-sm font-medium text-onBackgroundLight/70">Mật khẩu</span>}
+            label={<span className="text-xs font-semibold text-onBackgroundLight/60 uppercase tracking-wider">Mật khẩu</span>}
             name="password"
             rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
           >
             <Input.Password
               prefix={<LockOutlined className="text-onBackgroundLight/30" />}
               placeholder="Nhập mật khẩu..."
-              className="rounded-lg py-2"
+              className="rounded-xl py-2"
             />
           </Form.Item>
 
@@ -71,7 +71,7 @@ function Login({ onLoginSuccess }) {
             <Button
               type="primary"
               htmlType="submit"
-              className="w-full py-5 rounded-lg font-bold text-sm bg-orangePrimary hover:bg-orangeSecondary border-none flex items-center justify-center"
+              className="w-full py-5 rounded-xl font-bold text-sm bg-techBluePrimary hover:bg-techBluePrimary/90 border-none flex items-center justify-center shadow-[0_4px_14px_rgba(2,132,199,0.2)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
             >
               ĐĂNG NHẬP
             </Button>

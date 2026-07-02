@@ -4,12 +4,25 @@ export default {
   theme: {
     extend: {
       colors: {
-        orangePrimary: "#FF6F43",
-        orangeSecondary: "#FF8A65",
-        tealAccent: "#00BFA5",
-        backgroundLight: "#F8F9FA",
+        techBluePrimary: "#0284C7",
+        techMintAccent: "#10B981",
+        techSlateTitle: "#0F172A",
+        techBodyText: "#475569",
+        techBgSoft: "#F8FAFC",
+        // Backward compatibility mappings
+        indigoPrimary: "#0284C7",
+        mintAccent: "#10B981",
+        slateDark: "#0F172A",
+        neutralBg: "#F8FAFC",
+        orangePrimary: "#0284C7",
+        orangeSecondary: "#38BDF8",
+        tealAccent: "#10B981",
+        backgroundLight: "#F8FAFC",
         surfaceLight: "#FFFFFF",
-        onBackgroundLight: "#212121"
+        onBackgroundLight: "#0F172A"
+      },
+      fontFamily: {
+        sans: ["'Plus Jakarta Sans'", "Inter", "sans-serif"],
       }
     },
   },

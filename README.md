@@ -1,6 +1,33 @@
 # EzRoom Admin Dashboard - Hướng Dẫn Chạy Dự Án Local
 
-Dự án Web Admin Quản trị hệ thống EzRoom được xây dựng bằng **ReactJS + Vite + Tailwind CSS** và thư viện UI **Ant Design**. Dưới đây là hướng dẫn chi tiết cách tải, cài đặt và vận hành dự án trên môi trường cục bộ (local).
+Dự án Web Admin Quản trị hệ thống EzRoom được xây dựng bằng **ReactJS + Vite + Tailwind CSS** và thư viện UI **Ant Design**. Giao diện đã được nâng cấp đồng bộ toàn diện với dự án ứng dụng EzRoom Android dựa trên tệp đặc tả kỹ thuật `android_app_spec.md`.
+
+---
+
+## Tính Năng Quản Trị Cốt Lõi (Android Aligned)
+
+Hệ thống Web Admin cung cấp 4 phân hệ chính giúp quản lý dòng tiền và dữ liệu từ ứng dụng Android gửi lên:
+
+1. **Bảng Điều Khiển (Dashboard):**
+   - Thống kê tổng số thành viên và tỷ lệ duyệt danh tính eKYC của Chủ nhà.
+   - Thống kê số lượng cơ sở lưu trú phân tách rõ ràng giữa **Dãy trọ / Tòa nhà (Complex)** và **Phòng đơn lẻ (Standalone)**.
+   - Biểu đồ phân tích doanh thu đối soát hoa hồng 5% theo từng tháng.
+
+2. **Duyệt & Quản Lý Bài Đăng (Moderation & Listing Management):**
+   - **Chờ kiểm duyệt:** Phê duyệt bài đăng phòng lẻ hoặc tòa nhà phức hợp (kèm danh sách tiện ích chung của tòa nhà và tiện ích chi tiết trong phòng).
+   - **Đang hiển thị / Đã duyệt:** Quản lý danh sách phòng đang hiển thị trực tiếp trên app Android. Hỗ trợ thao tác **Tạm ẩn bài** (chuyển trạng thái `HIDDEN`) hoặc **Gỡ bài đăng ngay** (xóa khỏi hệ thống).
+   - **Báo cáo vi phạm:** Xem các lượt khiếu nại thực tế từ khách thuê và đưa ra quyết định gỡ bài vi phạm.
+
+3. **Đối Soát Tài Chính & Hoa Hồng (Financial Audit):**
+   - Xem chi tiết từng hóa đơn giao dịch (`Invoice`): Tiền phòng, tiền điện (chỉ số cũ &rarr; chỉ số mới), tiền nước, và chi phí phát sinh khác.
+   - Áp dụng chuẩn công thức hệ thống: **Trích xuất 5% hoa hồng chỉ dựa trên Tiền phòng thuê gốc** (không tính trên điện, nước, cọc, đền bù).
+   - Minh bạch hóa doanh thu thực nhận chuyển cho Chủ nhà (`Doanh thu = Tổng hóa đơn - 5% tiền phòng`).
+
+4. **Quản Lý Tài Khoản Thành Viên (User Management):**
+   - Theo dõi danh sách tài khoản Chủ nhà (`HOST`) và Người thuê (`RENTER`).
+   - Hiển thị Điểm uy tín (`creditScore`) cập nhật liên tục từ hành vi giao dịch và lịch hẹn.
+   - **Quy tắc eKYC:** Trạng thái xác minh danh tính eKYC hiển thị là **"Không yêu cầu"** đối với Người thuê và bắt buộc đối với Chủ nhà.
+   - Hỗ trợ khóa / mở khóa tài khoản vi phạm kèm lý do chi tiết.
 
 ---
 
@@ -17,7 +44,7 @@ Trước khi bắt đầu, hãy đảm bảo máy tính của bạn đã cài đ
 
 ### Bước 1: Clone dự án
 
-Tải mã nguồn từ kho lưu trữ GitHub về máy cục bộ của bạn:
+Tải mã nguồn về máy cục bộ của bạn:
 
 ```bash
 git clone https://github.com/dwadwada123/EzRoom-Admin.git
@@ -26,56 +53,54 @@ cd ezroom-admin
 
 ### Bước 2: Cài đặt các thư viện phụ thuộc
 
-Do thư mục `node_modules` đã được cấu hình ẩn trong tệp `.gitignore` khi push lên GitHub, bạn cần chạy lệnh sau để tải và phục hồi các thư viện phụ thuộc:
+Do thư mục `node_modules` đã được cấu hình ẩn trong tệp `.gitignore`, bạn cần phục hồi các thư viện:
 
 ```bash
 npm install
 ```
 
-### Bước 3: Khởi chạy môi trường phát triển
+### Bước 3: Khởi chạy môi trường phát triển (Local Server)
 
-Sau khi cài đặt xong các thư viện phụ thuộc, hãy khởi chạy máy chủ phát triển cục bộ:
+Khởi chạy máy chủ phát triển cục bộ:
 
 ```bash
 npm run dev
 ```
 
-Sau khi chạy thành công, terminal sẽ hiển thị địa chỉ local (thường là `http://localhost:5173`). Hãy sao chép địa chỉ này dán vào trình duyệt để trải nghiệm giao diện.
+Terminal sẽ hiển thị địa chỉ local (thường là `http://localhost:5173`). Bạn hãy mở trình duyệt và truy cập vào địa chỉ này.
 
 ---
 
 ## Thông Tin Tài Khoản Thử Nghiệm
 
-Khi truy cập vào trang Web Admin lần đầu tiên, hệ thống bảo vệ Token sẽ yêu cầu đăng nhập. Bạn có thể sử dụng một trong hai tài khoản mẫu dưới đây để kiểm thử:
+Khi truy cập giao diện lần đầu, hệ thống sẽ yêu cầu đăng nhập. Bạn sử dụng một trong hai tài khoản mẫu dưới đây:
 
-1. **Tài khoản kiểm thử chính:**
-   - **Email / Tài khoản:** `admin@ezroom.com`
+1. **Tài khoản chính:**
+   - **Tài khoản:** `admin@ezroom.com`
    - **Mật khẩu:** `123456`
 
 2. **Tài khoản dự phòng:**
-   - **Email / Tài khoản:** `admin`
+   - **Tài khoản:** `admin`
    - **Mật khẩu:** `admin123`
 
 ---
 
 ## Các Lệnh Hỗ Trợ Khác
 
-- **Biên dịch sản phẩm:**
-  Tạo mã nguồn tối ưu hóa lưu trữ trong thư mục `/dist` để sẵn sàng deploy lên môi trường live:
-
+- **Biên dịch sản phẩm (Production Build):**
+  Tạo mã nguồn tối ưu hóa trong thư mục `/dist` để sẵn sàng deploy:
   ```bash
   npm run build
   ```
 
-- **Kiểm tra lỗi tĩnh:**
-  Kiểm tra và chuẩn hóa cú pháp viết mã nguồn JavaScript/React theo quy tắc chung của dự án:
-
+- **Kiểm tra lỗi tĩnh (ESLint):**
+  Kiểm tra và chuẩn hóa cú pháp viết mã ReactJS:
   ```bash
   npm run lint
   ```
 
-- **Xem trước bản Build:**
-  Chạy thử sản phẩm sau khi đã tối ưu biên dịch ngay tại môi trường cục bộ:
+- **Xem trước bản Build (Vite Preview):**
+  Chạy thử sản phẩm sau khi đã tối ưu biên dịch ngay tại local:
   ```bash
   npm run preview
   ```
@@ -88,10 +113,11 @@ Khi truy cập vào trang Web Admin lần đầu tiên, hệ thống bảo vệ 
 ezroom-admin/
 ├── src/
 │   ├── components/      # Các component dùng chung (Sidebar, Header,...)
-│   ├── pages/           # Giao diện chính của từng phân hệ (Dashboard, Login,...)
-│   ├── App.jsx          # Cột sườn chính điều hợp và kiểm tra xác thực
-│   ├── index.css        # Khai báo cấu hình lớp phủ chỉ thị Tailwind CSS
+│   ├── pages/           # Giao diện quản trị (Dashboard, Moderation, User, Transactions,...)
+│   ├── App.jsx          # Router chính phối hợp layout và kiểm tra token
+│   ├── index.css        # Khai báo cấu hình CSS và nâng cấp Ant Design
 │   └── main.jsx         # Điểm khởi tạo gốc của ReactJS
-├── tailwind.config.js   # Cấu hình bảng màu thương hiệu chuẩn của EzRoom
+├── android_app_spec.md  # Tài liệu đặc tả kỹ thuật liên kết Android & Admin [NEW]
+├── tailwind.config.js   # Cấu hình hệ thống thiết kế thương hiệu EzRoom
 └── package.json         # Danh mục thư viện và script vận hành dự án
 ```

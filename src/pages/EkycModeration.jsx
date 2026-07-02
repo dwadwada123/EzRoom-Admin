@@ -102,13 +102,13 @@ function EkycModeration() {
     switch (status) {
       case "PENDING":
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orangePrimary/10 text-orangePrimary">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-techBluePrimary/10 text-techBluePrimary">
             Chờ kiểm duyệt
           </span>
         );
       case "VERIFIED":
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-tealAccent/10 text-tealAccent">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-techMintAccent/10 text-techMintAccent">
             Đã xác thực
           </span>
         );
@@ -153,7 +153,7 @@ function EkycModeration() {
       render: (_, record) => (
         <button
           onClick={() => handleOpenModal(record)}
-          className="text-orangePrimary font-semibold hover:text-orangeSecondary transition-colors duration-150 text-sm"
+          className="text-techBluePrimary font-semibold hover:text-techBluePrimary/80 transition-all duration-300 text-sm hover:underline hover:scale-105 active:scale-95 inline-block"
         >
           Xem hồ sơ
         </button>
@@ -163,10 +163,10 @@ function EkycModeration() {
 
   return (
     // Ekyc layout container
-    <div className="bg-surfaceLight rounded-xl p-6 shadow-sm border border-onBackgroundLight/5">
+    <div className="bg-surfaceLight/80 backdrop-blur-md rounded-2xl p-6 border border-onBackgroundLight/5 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
       {/* Title section */}
       <div className="mb-6">
-        <h3 className="text-lg font-bold text-onBackgroundLight">
+        <h3 className="text-lg font-bold text-onBackgroundLight tracking-wide">
           DANH SÁCH HỒ SƠ CHỜ DUYỆT ĐỊNH DANH (eKYC)
         </h3>
         <p className="text-sm text-onBackgroundLight/40">
@@ -181,7 +181,7 @@ function EkycModeration() {
           columns={columns}
           rowKey="id"
           pagination={{ pageSize: 5 }}
-          className="border-none"
+          className="custom-premium-table"
         />
       </div>
 
@@ -199,13 +199,13 @@ function EkycModeration() {
           <div className="flex justify-end gap-3 pt-4 border-t border-onBackgroundLight/10">
             <button
               onClick={handleReject}
-              className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-150 text-sm font-medium"
+              className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all duration-300 text-sm font-semibold active:scale-95 shadow-[0_2px_8px_rgba(239,68,68,0.15)]"
             >
               TỪ CHỐI HỒ SƠ
             </button>
             <button
               onClick={handleApprove}
-              className="px-5 py-2.5 bg-tealAccent hover:bg-tealAccent/90 text-white font-bold rounded-lg transition-colors duration-150 text-sm"
+              className="px-5 py-2.5 bg-techMintAccent hover:bg-techMintAccent/90 text-white font-bold rounded-xl transition-all duration-300 text-sm active:scale-95 shadow-[0_2px_8px_rgba(16,185,129,0.15)]"
             >
               PHÊ DUYỆT TÀI KHOẢN
             </button>
@@ -215,12 +215,12 @@ function EkycModeration() {
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
             {/* Card 1: Front ID */}
-            <div className="bg-backgroundLight border border-onBackgroundLight/5 rounded-xl p-3 flex flex-col items-center">
-              <div className="w-full aspect-[4/3] rounded-lg overflow-hidden bg-onBackgroundLight/5 mb-3 flex items-center justify-center">
+            <div className="bg-backgroundLight border border-onBackgroundLight/5 rounded-2xl p-3 flex flex-col items-center hover:border-techBluePrimary/10 hover:shadow-lg transition-all duration-300 group">
+              <div className="w-full aspect-[4/3] rounded-xl overflow-hidden bg-onBackgroundLight/5 mb-3 flex items-center justify-center">
                 <img
                   src={selectedRecord?.idFrontUrl}
                   alt="Mặt trước CCCD"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
               <span className="text-sm font-medium text-onBackgroundLight/70">
@@ -229,12 +229,12 @@ function EkycModeration() {
             </div>
 
             {/* Card 2: Back ID */}
-            <div className="bg-backgroundLight border border-onBackgroundLight/5 rounded-xl p-3 flex flex-col items-center">
-              <div className="w-full aspect-[4/3] rounded-lg overflow-hidden bg-onBackgroundLight/5 mb-3 flex items-center justify-center">
+            <div className="bg-backgroundLight border border-onBackgroundLight/5 rounded-2xl p-3 flex flex-col items-center hover:border-techBluePrimary/10 hover:shadow-lg transition-all duration-300 group">
+              <div className="w-full aspect-[4/3] rounded-xl overflow-hidden bg-onBackgroundLight/5 mb-3 flex items-center justify-center">
                 <img
                   src={selectedRecord?.idBackUrl}
                   alt="Mặt sau CCCD"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
               <span className="text-sm font-medium text-onBackgroundLight/70">
@@ -243,12 +243,12 @@ function EkycModeration() {
             </div>
 
             {/* Card 3: Selfie */}
-            <div className="bg-backgroundLight border border-onBackgroundLight/5 rounded-xl p-3 flex flex-col items-center">
-              <div className="w-full aspect-[4/3] rounded-lg overflow-hidden bg-onBackgroundLight/5 mb-3 flex items-center justify-center">
+            <div className="bg-backgroundLight border border-onBackgroundLight/5 rounded-2xl p-3 flex flex-col items-center hover:border-techBluePrimary/10 hover:shadow-lg transition-all duration-300 group">
+              <div className="w-full aspect-[4/3] rounded-xl overflow-hidden bg-onBackgroundLight/5 mb-3 flex items-center justify-center">
                 <img
                   src={selectedRecord?.selfieUrl}
                   alt="Ảnh selfie chân dung"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
               <span className="text-sm font-medium text-onBackgroundLight/70">
@@ -267,7 +267,7 @@ function EkycModeration() {
               placeholder="Nhập lý do chi tiết..."
               value={rejectionReason}
               onChange={(e) => setRejectionReason(e.target.value)}
-              className="rounded-lg"
+              className="rounded-xl"
             />
           </div>
         </div>

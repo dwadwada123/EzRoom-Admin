@@ -14,9 +14,34 @@ import Login from "./pages/Login";
 // Theme token configuration
 const themeConfig = {
   token: {
-    colorPrimary: "#FF6F43",
-    colorSuccess: "#00BFA5",
-    colorBgLayout: "#F8F9FA",
+    colorPrimary: "#0284C7",
+    colorSuccess: "#10B981",
+    colorBgLayout: "#F8FAFC",
+    colorTextBase: "#0F172A",
+    borderRadius: 12,
+    fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif",
+  },
+  components: {
+    Button: {
+      borderRadius: 12,
+      controlHeight: 40,
+    },
+    Input: {
+      borderRadius: 12,
+      controlHeight: 40,
+    },
+    Select: {
+      borderRadius: 12,
+      controlHeight: 40,
+    },
+    Table: {
+      headerBg: "transparent",
+      headerColor: "rgba(15, 23, 42, 0.5)",
+      rowHoverBg: "rgba(2, 132, 199, 0.03)",
+    },
+    Modal: {
+      borderRadiusLG: 20,
+    },
   },
 };
 
@@ -63,15 +88,18 @@ function App() {
           {/* Sidebar navigation */}
           <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-          {/* Main layout container */}
-          <div className="flex-1 h-screen overflow-hidden bg-backgroundLight flex flex-col">
-            {/* Header */}
-            <Header activeTab={activeTab} onLogout={handleLogout} />
+          {/* Main layout container with padding to create spacing from outer edges */}
+          <div className="flex-grow h-screen p-4 pl-2 flex flex-col">
+            {/* Unified Floating Glass Card */}
+            <div className="flex-grow h-full bg-surfaceLight/80 backdrop-blur-md rounded-2xl border border-onBackgroundLight/5 shadow-2xl flex flex-col overflow-hidden relative">
+              {/* Header */}
+              <Header activeTab={activeTab} onLogout={handleLogout} />
 
-            {/* Main content viewport */}
-            <main className="p-6 overflow-y-auto h-[calc(100vh-64px)]">
-              {renderContent()}
-            </main>
+              {/* Main content viewport scrolling independently */}
+              <main className="p-6 flex-grow overflow-y-auto">
+                {renderContent()}
+              </main>
+            </div>
           </div>
         </div>
       )}

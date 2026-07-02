@@ -22,3 +22,24 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# AI Agent configuration and skills
+.agents/
+.gemini/
+skills/
+skills-lock.json
+
+# Local env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Vite / bundler caches
+.eslintcache
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# Android app spec reference file
+android_app_spec.md
