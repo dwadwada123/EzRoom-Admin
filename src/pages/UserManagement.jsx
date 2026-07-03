@@ -198,11 +198,16 @@ function UserManagement() {
       title: "Điểm uy tín",
       dataIndex: "creditScore",
       key: "creditScore",
-      render: (score) => (
-        <span className={`font-semibold ${score >= 4.0 ? "text-emerald-600" : score >= 3.0 ? "text-amber-500" : "text-red-500"}`}>
-          {score.toFixed(1)} / 5.0
-        </span>
-      ),
+      render: (score, record) => {
+        if (record.role === "HOST") {
+          return <span className="text-slate-400 text-xs font-medium">Không áp dụng</span>;
+        }
+        return (
+          <span className={`font-semibold ${score >= 4.0 ? "text-emerald-600" : score >= 3.0 ? "text-amber-500" : "text-red-500"}`}>
+            {score.toFixed(1)} / 5.0
+          </span>
+        );
+      },
     },
     {
       title: "Trạng thái",
