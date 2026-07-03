@@ -12,7 +12,8 @@ const initialUsers = [
     role: "HOST",
     status: "ACTIVE",
     isEkycVerified: true,
-    creditScore: 4.8
+    recentViolations: 0,
+    totalViolations: 1
   },
   {
     id: "u2",
@@ -33,7 +34,8 @@ const initialUsers = [
     status: "LOCKED",
     lockReason: "Đăng tải thông tin phòng trọ giả mạo",
     isEkycVerified: true,
-    creditScore: 2.1
+    recentViolations: 3,
+    totalViolations: 4
   },
   {
     id: "u4",
@@ -53,7 +55,8 @@ const initialUsers = [
     role: "HOST",
     status: "ACTIVE",
     isEkycVerified: false,
-    creditScore: 3.8
+    recentViolations: 1,
+    totalViolations: 2
   }
 ];
 
@@ -195,17 +198,33 @@ function UserManagement() {
       },
     },
     {
-      title: "Điểm uy tín",
-      dataIndex: "creditScore",
-      key: "creditScore",
-      render: (score, record) => {
+      title: "Đánh giá / Chỉ số vi phạm",
+      key: "violationsOrCredit",
+      render: (_, record) => {
         if (record.role === "HOST") {
-          return <span className="text-slate-400 text-xs font-medium">Không áp dụng</span>;
+          const recent = record.recentViolations || 0;
+          if (recent === 0) {
+            return <Tag color="green">An toàn (0 vi phạm/30 ngày)</Tag>;
+          }
+          if (recent === 1) {
+            return <Tag color="orange">Cảnh báo (1 vi phạm/30 ngày)</Tag>;
+          }
+          return (
+            <Space direction="vertical" size={1} className="text-left">
+              <Tag color="red">Rủi ro cao ({recent} vi phạm/30 ngày)</Tag>
+              <span className="text-[10px] text-red-500 font-semibold italic">Đề xuất khóa tài khoản</span>
+            </Space>
+          );
         }
+        
+        const score = record.creditScore || 0;
         return (
-          <span className={`font-semibold ${score >= 4.0 ? "text-emerald-600" : score >= 3.0 ? "text-amber-500" : "text-red-500"}`}>
-            {score.toFixed(1)} / 5.0
-          </span>
+          <div className="flex flex-col text-left">
+            <span className={`font-semibold ${score >= 4.0 ? "text-emerald-600" : score >= 3.0 ? "text-amber-500" : "text-red-500"}`}>
+              {score.toFixed(1)} / 5.0
+            </span>
+            <span className="text-[10px] text-onBackgroundLight/40 font-medium">Điểm uy tín</span>
+          </div>
         );
       },
     },
