@@ -1,166 +1,205 @@
 import { useState } from "react";
-import { Tabs, Table, Modal, Input, Badge, Tag, Space, message } from "antd";
-import { AlertOutlined, SafetyCertificateOutlined } from "@ant-design/icons";
+import { Tabs, Table, Modal, Input, Badge, Tag, Space, message, Select } from "antd";
+import { AlertOutlined, SafetyCertificateOutlined, ArrowRightOutlined, SearchOutlined } from "@ant-design/icons";
 
-// Mock disputes dataset
-const initialDisputes = [
+// Mock dispute cases dataset (two-sided appeals)
+const initialDisputeCases = [
   {
-    id: "dr1",
-    type: "REVIEW_APPEAL", // Appeal against a host's negative review on a renter
-    senderName: "Nguyễn Thị Hoa",
-    senderRole: "RENTER",
-    targetName: "Đánh giá từ Lê Văn Tám (Chủ nhà)",
-    targetDetail: "Đánh giá: 1★ - 'Khách thuê vô ý thức, tự ý hủy xem phòng không báo trước và cãi cọ.'",
+    id: "CASE-101",
+    type: "REVIEW_DISPUTE",
+    targetName: "Đánh giá uy tín Người thuê: Nguyễn Thị Hoa",
+    status: "PENDING",
+    createdAt: "2026-07-02 14:30",
+    
+    // Appellant (the one claiming the penalty is unfair)
+    appellantName: "Nguyễn Thị Hoa",
+    appellantRole: "RENTER",
     appealReason: "Tôi có nhắn tin báo trước cho chủ nhà 2 tiếng qua hệ thống tin nhắn vì bận việc đột xuất gia đình, thái độ vẫn rất lịch sự. Chủ nhà đánh giá sai sự thật làm ảnh hưởng xấu đến Điểm uy tín của tôi.",
-    evidenceUrl: "https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&q=80&w=600",
-    status: "PENDING",
-    createdAt: "2026-07-02 14:30"
+    appealEvidenceUrl: "https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&q=80&w=600",
+    
+    // Original claim (why they were penalized)
+    originalAuthorName: "Lê Văn Tám (Chủ nhà)",
+    originalComment: "Đánh giá: 1★ - 'Khách thuê vô ý thức, tự ý hủy xem phòng không báo trước và cãi cọ.'"
   },
   {
-    id: "dr2",
-    type: "LISTING_APPEAL", // Appeal against an admin's listing takedown (reported by renter)
-    senderName: "Vũ Quốc Anh",
-    senderRole: "HOST",
-    targetName: "Bài đăng: Căn hộ dịch vụ tiện ích khu trung tâm (P.302)",
-    targetDetail: "Bài đăng bị gỡ do báo cáo 'Thông tin ảo / Địa chỉ không tồn tại'",
+    id: "CASE-102",
+    type: "LISTING_DISPUTE",
+    targetName: "Quyết định gỡ Bài đăng: Căn hộ dịch vụ tiện ích khu trung tâm (P.302)",
+    status: "PENDING",
+    createdAt: "2026-07-03 09:15",
+    
+    // Appellant (the Host claiming the listing is genuine)
+    appellantName: "Vũ Quốc Anh",
+    appellantRole: "HOST",
     appealReason: "Cơ sở của tôi có giấy đăng ký kinh doanh và giấy tờ sở hữu đất đầy đủ đính kèm bên dưới. Tin đăng bị báo cáo ảo là do cạnh tranh không lành mạnh từ các bên môi giới xung quanh.",
-    evidenceUrl: "https://images.unsplash.com/photo-1554415707-6e8cfc93fe23?auto=format&fit=crop&q=80&w=600",
-    status: "PENDING",
-    createdAt: "2026-07-03 09:15"
+    appealEvidenceUrl: "https://images.unsplash.com/photo-1554415707-6e8cfc93fe23?auto=format&fit=crop&q=80&w=600",
+    
+    // Original claim (why it was blocked - aggregated reports)
+    originalAuthorName: "Báo cáo gộp từ 3 khách thuê",
+    originalComment: "Báo cáo: 'Thông tin ảo / Địa chỉ không tồn tại thực tế trên bản đồ, gọi điện không liên lạc được.'"
   },
   {
-    id: "dr3",
-    type: "LISTING_APPEAL",
-    senderName: "Lê Hoài Nam",
-    senderRole: "HOST",
-    targetName: "Bài đăng: Căn hộ dịch vụ studio mini giá rẻ",
-    targetDetail: "Bài đăng bị gỡ do báo cáo 'Lừa đảo cọc trước'",
-    appealReason: "Khách thuê tự ý hủy thỏa thuận thuê trước 1 ngày nhận phòng và đòi lại tiền cọc giữ chỗ. Theo điều khoản thỏa thuận cọc lúc đầu, khách tự hủy sẽ mất cọc. Tôi không lừa đảo.",
-    evidenceUrl: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&q=80&w=600",
+    id: "CASE-103",
+    type: "LISTING_DISPUTE",
+    targetName: "Quyết định gỡ Bài đăng: Căn hộ dịch vụ studio mini giá rẻ",
     status: "APPROVED",
     createdAt: "2026-07-01 10:20",
     resolvedAt: "2026-07-01 16:45",
-    resolutionNote: "Đã xác minh thỏa thuận đặt cọc giữ chỗ hợp lệ giữa hai bên. Khôi phục bài đăng hoạt động trở lại."
+    resolutionNote: "Đã xác minh thỏa thuận đặt cọc giữ chỗ hợp lệ giữa hai bên. Khôi phục bài đăng hoạt động trở lại.",
+    
+    appellantName: "Lê Hoài Nam",
+    appellantRole: "HOST",
+    appealReason: "Khách thuê tự ý hủy thỏa thuận thuê trước 1 ngày nhận phòng và đòi lại tiền cọc giữ chỗ. Theo thỏa thuận ban đầu, tự hủy sẽ mất cọc. Tôi không lừa đảo.",
+    appealEvidenceUrl: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&q=80&w=600",
+    
+    originalAuthorName: "Báo cáo từ khách thuê: Phạm Văn Đồng",
+    originalComment: "Báo cáo: 'Lừa đảo cọc giữ chỗ phòng trọ, đòi tiền lại không trả'"
   },
   {
-    id: "dr4",
-    type: "REVIEW_APPEAL",
-    senderName: "Phạm Thúy Hằng",
-    senderRole: "RENTER",
-    targetName: "Đánh giá từ Trần Minh Hoàng (Chủ nhà)",
-    targetDetail: "Đánh giá: 2★ - 'Khách thuê thanh toán chậm tiền phòng tháng 6'",
-    appealReason: "Hợp đồng quy định đóng tiền trước ngày 5 hàng tháng. Tôi chuyển khoản tối ngày 4 nhưng ngân hàng bị lỗi giao dịch chậm 24h, tôi đã gửi ảnh bill chuyển tiền tối ngày 4 cho chủ nhà từ trước.",
-    evidenceUrl: "https://images.unsplash.com/photo-1616077168079-7e09a677fb2c?auto=format&fit=crop&q=80&w=600",
+    id: "CASE-104",
+    type: "REVIEW_DISPUTE",
+    targetName: "Đánh giá uy tín Người thuê: Phạm Thúy Hằng",
     status: "REJECTED",
     createdAt: "2026-06-30 08:00",
     resolvedAt: "2026-06-30 15:30",
-    resolutionNote: "Giao dịch thực tế báo lỗi và chủ nhà thực nhận vào ngày 6. Đánh giá của chủ nhà phản ánh đúng thực tế trễ hạn. Bác bỏ khiếu nại."
+    resolutionNote: "Giao dịch thực tế báo lỗi và chủ nhà thực nhận vào ngày 6 (quá hạn ngày 5). Đánh giá của chủ nhà phản ánh đúng thực tế trễ hạn. Bác bỏ khiếu nại.",
+    
+    appellantName: "Phạm Thúy Hằng",
+    appellantRole: "RENTER",
+    appealReason: "Hợp đồng quy định đóng tiền trước ngày 5 hàng tháng. Tôi chuyển khoản tối ngày 4 nhưng ngân hàng bị lỗi giao dịch chậm 24h, tôi đã gửi ảnh bill chuyển tiền tối ngày 4 cho chủ nhà từ trước.",
+    appealEvidenceUrl: "https://images.unsplash.com/photo-1616077168079-7e09a677fb2c?auto=format&fit=crop&q=80&w=600",
+    
+    originalAuthorName: "Trần Minh Hoàng (Chủ nhà)",
+    originalComment: "Đánh giá: 2★ - 'Khách thuê thanh toán chậm tiền phòng tháng 6'"
   }
 ];
 
 function DisputeResolution() {
-  const [disputes, setDisputes] = useState(initialDisputes);
+  const [cases, setCases] = useState(initialDisputeCases);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedDispute, setSelectedDispute] = useState(null);
+  const [selectedCase, setSelectedCase] = useState(null);
   const [resolutionNote, setResolutionNote] = useState("");
 
-  const pendingDisputes = disputes.filter((d) => d.status === "PENDING");
-  const resolvedDisputes = disputes.filter((d) => d.status !== "PENDING");
+  // Filters
+  const [searchQuery, setSearchQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState("ALL");
 
-  const handleOpenModal = (dispute) => {
-    setSelectedDispute(dispute);
+  const handleOpenModal = (disputeCase) => {
+    setSelectedCase(disputeCase);
     setResolutionNote("");
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
-    setSelectedDispute(null);
+    setSelectedCase(null);
     setIsModalOpen(false);
   };
 
-  // Approve Appeal: Accept appeal, cancel the penalty/restore the listing
   const handleApproveAppeal = () => {
-    if (!selectedDispute) return;
+    if (!selectedCase) return;
     if (!resolutionNote.trim()) {
       message.error("Vui lòng nhập lý do phê duyệt khiếu nại!");
       return;
     }
-    setDisputes((prev) =>
-      prev.map((d) =>
-        d.id === selectedDispute.id
+    setCases((prev) =>
+      prev.map((c) =>
+        c.id === selectedCase.id
           ? {
-              ...d,
+              ...c,
               status: "APPROVED",
               resolvedAt: new Date().toISOString().replace("T", " ").substring(0, 16),
               resolutionNote
             }
-          : d
+          : c
       )
     );
-    message.success(
-      selectedDispute.type === "REVIEW_APPEAL"
-        ? "Đã chấp nhận khiếu nại: Đánh giá tiêu cực đã được gỡ bỏ khỏi người thuê!"
-        : "Đã chấp nhận khiếu nại: Bài đăng đã được khôi phục trạng thái hoạt động!"
-    );
+    message.success("Đã chấp nhận khiếu nại: Đảo ngược hình phạt/Khôi phục tin đăng thành công!");
     handleCloseModal();
   };
 
-  // Reject Appeal: Decline appeal, maintain the rating penalty or listing takedown
   const handleRejectAppeal = () => {
-    if (!selectedDispute) return;
+    if (!selectedCase) return;
     if (!resolutionNote.trim()) {
       message.error("Vui lòng nhập lý do bác bỏ khiếu nại!");
       return;
     }
-    setDisputes((prev) =>
-      prev.map((d) =>
-        d.id === selectedDispute.id
+    setCases((prev) =>
+      prev.map((c) =>
+        c.id === selectedCase.id
           ? {
-              ...d,
+              ...c,
               status: "REJECTED",
               resolvedAt: new Date().toISOString().replace("T", " ").substring(0, 16),
               resolutionNote
             }
-          : d
+          : c
       )
     );
-    message.error("Đã bác bỏ khiếu nại: Giữ nguyên quyết định xử lý ban đầu.");
+    message.error("Đã bác bỏ khiếu nại: Giữ nguyên hình phạt ban đầu.");
     handleCloseModal();
   };
 
+  // Filter cases logic
+  const getFilteredCases = (list) => {
+    return list.filter((item) => {
+      const matchSearch =
+        !searchQuery.trim() ||
+        item.targetName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.appellantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.originalAuthorName.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchType = typeFilter === "ALL" || item.type === typeFilter;
+      return matchSearch && matchType;
+    });
+  };
+
+  const pendingCases = getFilteredCases(cases.filter((c) => c.status === "PENDING"));
+  const resolvedCases = getFilteredCases(cases.filter((c) => c.status !== "PENDING"));
+
   const pendingColumns = [
     {
-      title: "Loại khiếu nại",
+      title: "Mã Vụ việc",
+      dataIndex: "id",
+      key: "id",
+      render: (text) => <span className="font-bold text-slate-800">{text}</span>,
+    },
+    {
+      title: "Loại đối thoại",
       key: "type",
       render: (_, record) =>
-        record.type === "REVIEW_APPEAL" ? (
+        record.type === "REVIEW_DISPUTE" ? (
           <Tag color="cyan" icon={<SafetyCertificateOutlined />}>Khiếu nại Đánh giá</Tag>
         ) : (
           <Tag color="magenta" icon={<AlertOutlined />}>Khiếu nại Gỡ bài</Tag>
         ),
     },
     {
-      title: "Người khiếu nại",
-      key: "sender",
+      title: "Bên Kháng nghị (Bị phạt)",
+      key: "appellant",
       render: (_, record) => (
         <div className="flex flex-col text-left">
-          <span className="font-semibold text-slate-800">{record.senderName}</span>
+          <span className="font-semibold text-slate-800">{record.appellantName}</span>
           <span className="text-[10px] text-slate-400 font-medium">
-            {record.senderRole === "RENTER" ? "Người thuê" : "Chủ nhà"}
+            {record.appellantRole === "RENTER" ? "Người thuê" : "Chủ nhà"}
           </span>
         </div>
       ),
     },
     {
-      title: "Đối tượng ảnh hưởng",
-      dataIndex: "targetName",
-      key: "targetName",
-      render: (text) => <span className="font-medium text-slate-700">{text}</span>,
+      title: "Bên Nguyên cáo (Gửi báo cáo/đánh giá)",
+      key: "originalAuthor",
+      render: (_, record) => (
+        <span className="font-medium text-slate-600">{record.originalAuthorName}</span>
+      ),
     },
     {
-      title: "Thời gian gửi",
-      dataIndex: "createdAt",
-      key: "createdAt",
+      title: "Đối tượng tranh chấp",
+      dataIndex: "targetName",
+      key: "targetName",
+      render: (text) => (
+        <span className="font-medium text-slate-700 block max-w-xs truncate" title={text}>
+          {text}
+        </span>
+      ),
     },
     {
       title: "Tác vụ",
@@ -170,7 +209,7 @@ function DisputeResolution() {
           onClick={() => handleOpenModal(record)}
           className="text-techBluePrimary font-semibold hover:text-techBluePrimary/80 transition-all duration-300 text-sm hover:underline hover:scale-105 active:scale-95 inline-block"
         >
-          Xử lý khiếu nại
+          Xử lý tranh chấp
         </button>
       ),
     },
@@ -178,44 +217,38 @@ function DisputeResolution() {
 
   const resolvedColumns = [
     {
-      title: "Loại khiếu nại",
+      title: "Mã Vụ việc",
+      dataIndex: "id",
+      key: "id",
+      render: (text) => <span className="font-bold text-slate-800">{text}</span>,
+    },
+    {
+      title: "Loại đối thoại",
       key: "type",
       render: (_, record) =>
-        record.type === "REVIEW_APPEAL" ? (
+        record.type === "REVIEW_DISPUTE" ? (
           <Tag color="cyan">Khiếu nại Đánh giá</Tag>
         ) : (
           <Tag color="magenta">Khiếu nại Gỡ bài</Tag>
         ),
     },
     {
-      title: "Người khiếu nại",
-      key: "sender",
-      render: (_, record) => (
-        <div className="flex flex-col text-left">
-          <span className="font-semibold text-slate-800">{record.senderName}</span>
-          <span className="text-[10px] text-slate-400 font-medium">
-            {record.senderRole === "RENTER" ? "Người thuê" : "Chủ nhà"}
-          </span>
-        </div>
-      ),
+      title: "Bên kháng nghị",
+      dataIndex: "appellantName",
+      key: "appellantName",
     },
     {
-      title: "Đối tượng",
-      dataIndex: "targetName",
-      key: "targetName",
-    },
-    {
-      title: "Kết quả giải quyết",
+      title: "Kết quả",
       key: "status",
       render: (_, record) =>
         record.status === "APPROVED" ? (
-          <Tag color="green">Chấp nhận khiếu nại</Tag>
+          <Tag color="green">Chấp nhận khiếu nại (Đảo ngược phạt)</Tag>
         ) : (
-          <Tag color="red">Bác bỏ khiếu nại</Tag>
+          <Tag color="red">Bác bỏ khiếu nại (Giữ nguyên phạt)</Tag>
         ),
     },
     {
-      title: "Thời gian giải quyết",
+      title: "Thời gian xử lý",
       dataIndex: "resolvedAt",
       key: "resolvedAt",
     },
@@ -238,13 +271,13 @@ function DisputeResolution() {
       key: "pendingTab",
       label: (
         <span className="flex items-center gap-2">
-          Chờ giải quyết
-          <Badge count={pendingDisputes.length} style={{ backgroundColor: "#0284C7" }} />
+          Tranh chấp chờ giải quyết
+          <Badge count={pendingCases.length} style={{ backgroundColor: "#0284C7" }} />
         </span>
       ),
       children: (
         <Table
-          dataSource={pendingDisputes}
+          dataSource={pendingCases}
           columns={pendingColumns}
           rowKey="id"
           pagination={{ pageSize: 5 }}
@@ -256,13 +289,13 @@ function DisputeResolution() {
       key: "resolvedTab",
       label: (
         <span className="flex items-center gap-2">
-          Đã giải quyết
-          <Badge count={resolvedDisputes.length} style={{ backgroundColor: "#10B981" }} />
+          Lịch sử đã giải quyết
+          <Badge count={resolvedCases.length} style={{ backgroundColor: "#10B981" }} />
         </span>
       ),
       children: (
         <Table
-          dataSource={resolvedDisputes}
+          dataSource={resolvedCases}
           columns={resolvedColumns}
           rowKey="id"
           pagination={{ pageSize: 5 }}
@@ -277,40 +310,71 @@ function DisputeResolution() {
       {/* Header */}
       <div className="mb-6">
         <h3 className="text-lg font-bold text-onBackgroundLight tracking-wide">
-          GIẢI QUYẾT KHIẾU NẠI & TRANH CHẤP
+          GIẢI QUYẾT KHIẾU NẠI & TRANH CHẤP HAI CHIỀU
         </h3>
         <p className="text-sm text-onBackgroundLight/40">
-          Xem xét các yêu cầu kháng cáo về đánh giá xấu của người thuê hoặc các quyết định gỡ bài đăng từ chủ nhà
+          Xem xét thông tin đối thoại hai chiều: lý do báo cáo ban đầu đối chiếu song song với minh chứng giải trình từ bên kháng cáo
         </p>
       </div>
 
-      {/* Tabs list */}
+      {/* Filter toolbar */}
+      <div className="mb-6 flex flex-col md:flex-row md:items-center gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-[0_2px_12px_rgba(15,23,42,0.02)]">
+        <div className="flex-grow text-left">
+          <Input
+            prefix={<SearchOutlined className="text-onBackgroundLight/30" />}
+            placeholder="Tìm theo mã vụ việc, bên kháng nghị hoặc nội dung tranh chấp..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="rounded-xl"
+            allowClear
+          />
+        </div>
+        <div className="w-full md:w-64 text-left">
+          <Select
+            value={typeFilter}
+            onChange={(val) => setTypeFilter(val)}
+            options={[
+              { value: "ALL", label: "Tất cả loại tranh chấp" },
+              { value: "REVIEW_DISPUTE", label: "Khiếu nại Đánh giá" },
+              { value: "LISTING_DISPUTE", label: "Khiếu nại Gỡ bài đăng" }
+            ]}
+            className="w-full"
+          />
+        </div>
+      </div>
+
+      {/* Tabs */}
       <Tabs defaultActiveKey="pendingTab" items={tabItems} className="custom-tabs" />
 
-      {/* Detail dispute resolution modal */}
+      {/* Two-sided resolution modal */}
       <Modal
         title={
-          <span className="text-lg font-bold text-onBackgroundLight">
-            CHI TIẾT KHIẾU NẠI: #{selectedDispute?.id}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-bold text-onBackgroundLight">
+              ĐỐI CHIẾU TRANH CHẤP HAI CHIỀU: {selectedCase?.id}
+            </span>
+            <Tag color={selectedCase?.type === "REVIEW_DISPUTE" ? "cyan" : "magenta"}>
+              {selectedCase?.type === "REVIEW_DISPUTE" ? "Review Appeal" : "Listing Takedown Appeal"}
+            </Tag>
+          </div>
         }
         open={isModalOpen}
         onCancel={handleCloseModal}
-        width={700}
+        width={850}
         footer={
-          selectedDispute?.status === "PENDING" ? (
+          selectedCase?.status === "PENDING" ? (
             <div className="flex justify-end gap-3 pt-4 border-t border-onBackgroundLight/10">
               <button
                 onClick={handleRejectAppeal}
                 className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-150 text-sm font-medium"
               >
-                BÁC BỎ KHIẾU NẠI
+                BÁC BỎ KHIẾU NẠI (Giữ nguyên phạt)
               </button>
               <button
                 onClick={handleApproveAppeal}
                 className="px-5 py-2.5 bg-techMintAccent hover:bg-techMintAccent/90 text-white font-bold rounded-lg transition-colors duration-150 text-sm"
               >
-                CHẤP NHẬN KHIẾU NẠI
+                CHẤP NHẬN KHIẾU NẠI (Đảo ngược phạt)
               </button>
             </div>
           ) : (
@@ -325,92 +389,113 @@ function DisputeResolution() {
           )
         }
       >
-        {selectedDispute && (
-          <div className="space-y-4 mt-4 text-left max-h-[70vh] overflow-y-auto pr-2">
-            {/* Appellant details */}
-            <div className="grid grid-cols-2 gap-4 bg-backgroundLight p-4 rounded-xl border border-onBackgroundLight/5">
-              <div>
-                <span className="text-xs text-slate-500 block">Người kháng cáo</span>
-                <span className="text-sm font-bold text-slate-800">
-                  {selectedDispute.senderName} ({selectedDispute.senderRole === "RENTER" ? "Người thuê" : "Chủ nhà"})
-                </span>
-              </div>
-              <div>
-                <span className="text-xs text-slate-500 block">Thời điểm khiếu nại</span>
-                <span className="text-sm font-semibold text-slate-800">{selectedDispute.createdAt}</span>
-              </div>
+        {selectedCase && (
+          <div className="space-y-5 mt-4 text-left max-h-[72vh] overflow-y-auto pr-2">
+            
+            {/* Header info */}
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+              <span className="text-xs text-slate-400 block font-semibold">TÂM ĐIỂM TRANH CHẤP</span>
+              <span className="text-sm font-bold text-slate-800 block mt-0.5">{selectedCase.targetName}</span>
             </div>
 
-            {/* Target item of appeal */}
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-1">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                NỘI DUNG/QUYẾT ĐỊNH BỊ KHIẾU NẠI
-              </span>
-              <span className="text-sm font-bold text-slate-700 block">{selectedDispute.targetName}</span>
-              <p className="text-xs text-slate-500 bg-white p-3 rounded-lg border border-slate-100 mt-2 font-medium">
-                {selectedDispute.targetDetail}
-              </p>
-            </div>
-
-            {/* Reason */}
-            <div className="space-y-1">
-              <span className="text-xs font-semibold text-onBackgroundLight/50">LÝ DO KHÁNG CÁO</span>
-              <p className="text-sm text-onBackgroundLight/85 bg-backgroundLight p-3 rounded-lg border border-onBackgroundLight/5">
-                {selectedDispute.appealReason}
-              </p>
-            </div>
-
-            {/* Evidence attachment file */}
-            {selectedDispute.evidenceUrl && (
-              <div className="space-y-2">
-                <span className="text-xs font-semibold text-onBackgroundLight/50 block">MINH CHỨNG ĐÍNH KÈM</span>
-                <div className="relative rounded-lg overflow-hidden border border-slate-200 w-full max-w-sm bg-slate-100">
-                  <img
-                    src={selectedDispute.evidenceUrl}
-                    alt="Dispute evidence"
-                    className="w-full h-auto object-contain max-h-56"
-                  />
-                  <div className="absolute bottom-0 inset-x-0 bg-slate-900/60 p-2 text-center text-xs text-white backdrop-blur-sm font-semibold">
-                    Xem ảnh chứng cứ giao dịch / tin nhắn
+            {/* Side-by-side comparison block */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+              
+              {/* Left Side: Original Claim / Penalty Reason */}
+              <div className="bg-slate-50/50 p-4 rounded-xl border border-slate-200 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[10px] font-bold text-red-500 uppercase tracking-wider">
+                      BÊN NGUYÊN CÁO (Báo cáo/Đánh giá gốc)
+                    </span>
+                    <Tag color="error">Cáo buộc</Tag>
                   </div>
+                  <span className="text-sm font-bold text-slate-800 block mb-1">
+                    {selectedCase.originalAuthorName}
+                  </span>
+                  <p className="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-150 leading-relaxed font-medium">
+                    {selectedCase.originalComment}
+                  </p>
+                </div>
+                <div className="mt-4 text-xs text-slate-400 italic">
+                  * Lý do hệ thống áp dụng hạn chế / gỡ bài viết lúc đầu.
                 </div>
               </div>
-            )}
 
-            {/* Resolved state details */}
-            {selectedDispute.status !== "PENDING" && (
+              {/* Right Side: Appellant Appeal & New Evidence */}
+              <div className="bg-blue-50/20 p-4 rounded-xl border border-blue-100 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">
+                      BÊN BỊ CÁO (Yêu cầu kháng nghị)
+                    </span>
+                    <Tag color="processing">Kháng nghị</Tag>
+                  </div>
+                  <span className="text-sm font-bold text-slate-800 block mb-1">
+                    {selectedCase.appellantName} ({selectedCase.appellantRole === "RENTER" ? "Người thuê" : "Chủ nhà"})
+                  </span>
+                  <p className="text-xs text-slate-700 bg-white p-3 rounded-lg border border-blue-50 leading-relaxed font-medium mb-3">
+                    {selectedCase.appealReason}
+                  </p>
+
+                  {/* Evidence media */}
+                  {selectedCase.appealEvidenceUrl && (
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-semibold text-slate-400 block">BẰNG CHỨNG GIẢI TRÌNH ĐÍNH KÈM:</span>
+                      <div className="relative rounded-lg overflow-hidden border border-slate-200 w-full max-w-[280px] bg-slate-100">
+                        <img
+                          src={selectedCase.appealEvidenceUrl}
+                          alt="Appeal evidence"
+                          className="w-full h-auto object-contain max-h-40"
+                        />
+                        <div className="absolute bottom-0 inset-x-0 bg-slate-900/60 py-1 text-center text-[10px] text-white backdrop-blur-sm font-semibold">
+                          Click để phóng to ảnh
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="mt-4 text-xs text-slate-400 italic">
+                  * Bằng chứng mới do bên kháng nghị cung cấp làm cơ sở đảo ngược quyết định.
+                </div>
+              </div>
+
+            </div>
+
+            {/* Resolved state information */}
+            {selectedCase.status !== "PENDING" && (
               <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100 space-y-2">
                 <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider block">
                   KẾT QUẢ GIẢI QUYẾT CỦA HỆ THỐNG
                 </span>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <span className="text-xs text-slate-500 block">Trạng thái quyết định</span>
-                    <Tag color={selectedDispute.status === "APPROVED" ? "green" : "red"} className="mt-1 font-bold">
-                      {selectedDispute.status === "APPROVED" ? "CHẤP NHẬN TRANH CHẤP" : "BÁC BỎ TRANH CHẤP"}
+                    <span className="text-xs text-slate-500 block">Quyết định phán quyết</span>
+                    <Tag color={selectedCase.status === "APPROVED" ? "green" : "red"} className="mt-1 font-bold">
+                      {selectedCase.status === "APPROVED" ? "CHẤP NHẬN KHIẾU NẠI (ĐẢO NGƯỢC PHẠT)" : "BÁC BỎ KHIẾU NẠI (GIỮ NGUYÊN PHẠT)"}
                     </Tag>
                   </div>
                   <div>
                     <span className="text-xs text-slate-500 block">Thời gian xử lý</span>
-                    <span className="text-sm font-semibold text-slate-800 block mt-1">{selectedDispute.resolvedAt}</span>
+                    <span className="text-sm font-semibold text-slate-800 block mt-1">{selectedCase.resolvedAt}</span>
                   </div>
                 </div>
                 <div className="pt-2 border-t border-emerald-100/50">
                   <span className="text-xs text-slate-500 block">Ghi chú giải quyết của Admin</span>
-                  <p className="text-sm font-medium text-slate-700 mt-1">{selectedDispute.resolutionNote}</p>
+                  <p className="text-sm font-medium text-slate-700 mt-1">{selectedCase.resolutionNote}</p>
                 </div>
               </div>
             )}
 
             {/* Admin input for pending status */}
-            {selectedDispute.status === "PENDING" && (
-              <div className="space-y-1.5 pt-2">
+            {selectedCase.status === "PENDING" && (
+              <div className="space-y-1.5 pt-2 border-t border-slate-100">
                 <label className="text-xs font-semibold text-onBackgroundLight/50 block">
                   Ghi chú kết quả xử lý và phản hồi gửi đến các bên (Bắt buộc)
                 </label>
                 <Input.TextArea
                   rows={3}
-                  placeholder="Nhập chi tiết ghi chú xử lý để gửi thông báo cho khách thuê/chủ nhà..."
+                  placeholder="Nhập lý do chi tiết chấp nhận hoặc bác bỏ khiếu nại..."
                   value={resolutionNote}
                   onChange={(e) => setResolutionNote(e.target.value)}
                   className="rounded-lg"
