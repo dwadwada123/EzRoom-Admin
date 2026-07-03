@@ -9,6 +9,7 @@ import UserManagement from "./pages/UserManagement";
 import AmenityManagement from "./pages/AmenityManagement";
 import TransactionHistory from "./pages/TransactionHistory";
 import ContractManagement from "./pages/ContractManagement";
+import DisputeResolution from "./pages/DisputeResolution";
 import Login from "./pages/Login";
 
 // Theme token configuration
@@ -73,6 +74,8 @@ function App() {
         return <RoomModeration />;
       case "users":
         return <UserManagement />;
+      case "disputes":
+        return <DisputeResolution />;
       default:
         return null;
     }

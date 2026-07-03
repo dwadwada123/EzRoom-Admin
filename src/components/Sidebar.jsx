@@ -6,6 +6,7 @@ import {
   AppstoreAddOutlined,
   TransactionOutlined,
   FileTextOutlined,
+  AlertOutlined,
 } from "@ant-design/icons";
 
 // Sidebar component
@@ -19,6 +20,7 @@ function Sidebar({ activeTab, setActiveTab }) {
     { key: "amenities", label: "Quản lý Tiện ích", icon: <AppstoreAddOutlined /> },
     { key: "moderation", label: "Kiểm duyệt bài đăng", icon: <FileProtectOutlined /> },
     { key: "users", label: "Quản lý tài khoản", icon: <TeamOutlined /> },
+    { key: "disputes", label: "Giải quyết khiếu nại", icon: <AlertOutlined /> },
   ];
 
   return (
