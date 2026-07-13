@@ -13,10 +13,11 @@ Hệ thống Web Admin cung cấp 4 phân hệ chính giúp quản lý dòng ti�
    - Thống kê số lượng cơ sở lưu trú phân tách rõ ràng giữa **Dãy trọ / Tòa nhà (Complex)** và **Phòng đơn lẻ (Standalone)**.
    - Biểu đồ phân tích doanh thu đối soát hoa hồng 5% theo từng tháng.
 
-2. **Duyệt & Quản Lý Bài Đăng (Moderation & Listing Management):**
-   - **Chờ kiểm duyệt:** Phê duyệt bài đăng phòng lẻ hoặc tòa nhà phức hợp (kèm danh sách tiện ích chung của tòa nhà và tiện ích chi tiết trong phòng).
-   - **Đang hiển thị / Đã duyệt:** Quản lý danh sách phòng đang hiển thị trực tiếp trên app Android. Hỗ trợ thao tác **Tạm ẩn bài** (chuyển trạng thái `HIDDEN`) hoặc **Gỡ bài đăng ngay** (xóa khỏi hệ thống).
-   - **Báo cáo vi phạm:** Xem các lượt khiếu nại thực tế từ khách thuê và đưa ra quyết định gỡ bài vi phạm.
+2. **Duyệt & Quản Lý Phòng Trọ (Room Moderation & Management):**
+   - **Chờ kiểm duyệt:** Phê duyệt phòng lẻ hoặc phòng trực thuộc dãy trọ/tòa nhà. Khi kiểm duyệt phòng trong Dãy trọ/Tòa nhà, giao diện hỗ trợ hiển thị **Danh sách phòng chờ duyệt cùng Tòa nhà** để Admin có thể duyệt nhanh hoặc đối soát song song.
+   - **Đồng bộ dữ liệu kỹ thuật Android (v1.0):** Hiển thị bộ sưu tập ảnh thực tế phân loại theo danh mục (*Mặt tiền, Phòng ngủ, WC*), bảng phân rã diện tích chi tiết các phòng chức năng, và **Bản đồ trực quan (Google Maps Pin)** ghim vị trí dựa trên tọa độ GPS (Lat/Lng).
+   - **Đang hiển thị / Đã duyệt:** Quản lý danh sách phòng đang hiển thị trực tiếp trên app Android. Hỗ trợ thao tác **Tạm ẩn phòng** (chuyển trạng thái `HIDDEN`) hoặc **Khóa phòng trọ** (xóa khỏi hệ thống).
+   - **Báo cáo vi phạm:** Xem các lượt khiếu nại thực tế từ khách thuê và đưa ra quyết định khóa phòng vi phạm.
 
 3. **Đối Soát Tài Chính & Hoa Hồng (Financial Audit):**
    - Xem chi tiết từng hóa đơn giao dịch (`Invoice`): Tiền phòng, tiền điện (chỉ số cũ &rarr; chỉ số mới), tiền nước, và chi phí phát sinh khác.
@@ -25,7 +26,8 @@ Hệ thống Web Admin cung cấp 4 phân hệ chính giúp quản lý dòng ti�
 
 4. **Quản Lý Tài Khoản Thành Viên (User Management):**
    - Theo dõi danh sách tài khoản Chủ nhà (`HOST`) và Người thuê (`RENTER`).
-   - Hiển thị Điểm uy tín (`creditScore`) cập nhật liên tục từ hành vi giao dịch và lịch hẹn.
+   - **Tối ưu hóa hiển thị (Row-level Click Toggle):** Bảng tài khoản được thu gọn. Khi nhấp vào **bất kỳ ô nào trên hàng người dùng**, chi tiết Email và Số điện thoại liên hệ sẽ trượt xuống hiển thị trực quan.
+   - **Nhãn chỉ số vi phạm rút gọn:** Các trạng thái vi phạm được rút gọn thành **An toàn**, **Cảnh báo**, **Rủi ro cao** đi kèm một bảng **Chú giải chỉ số** đặt ở góc trên bên phải thanh công cụ.
    - **Quy tắc eKYC:** Trạng thái xác minh danh tính eKYC hiển thị là **"Không yêu cầu"** đối với Người thuê và bắt buộc đối với Chủ nhà.
    - Hỗ trợ khóa / mở khóa tài khoản vi phạm kèm lý do chi tiết.
 

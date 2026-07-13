@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Tabs, Table, Modal, Input, Badge, Tag, Space, message, Select } from "antd";
-import { AlertOutlined, SafetyCertificateOutlined, ArrowRightOutlined, SearchOutlined } from "@ant-design/icons";
+import { Tabs, Table, Modal, Input, Badge, Tag, message, Select } from "antd";
+import { AlertOutlined, SafetyCertificateOutlined, SearchOutlined } from "@ant-design/icons";
 
 // Mock dispute cases dataset (two-sided appeals)
 const initialDisputeCases = [
@@ -24,14 +24,14 @@ const initialDisputeCases = [
   {
     id: "CASE-102",
     type: "LISTING_DISPUTE",
-    targetName: "Quyết định gỡ Bài đăng: Căn hộ dịch vụ tiện ích khu trung tâm (P.302)",
+    targetName: "Quyết định khóa Phòng: Căn hộ dịch vụ tiện ích khu trung tâm (P.302)",
     status: "PENDING",
     createdAt: "2026-07-03 09:15",
     
     // Appellant (the Host claiming the listing is genuine)
     appellantName: "Vũ Quốc Anh",
     appellantRole: "HOST",
-    appealReason: "Cơ sở của tôi có giấy đăng ký kinh doanh và giấy tờ sở hữu đất đầy đủ đính kèm bên dưới. Tin đăng bị báo cáo ảo là do cạnh tranh không lành mạnh từ các bên môi giới xung quanh.",
+    appealReason: "Cơ sở của tôi có giấy đăng ký kinh doanh và giấy tờ sở hữu đất đầy đủ đính kèm bên dưới. Phòng trọ bị báo cáo ảo là do cạnh tranh không lành mạnh từ các bên môi giới xung quanh.",
     appealEvidenceUrl: "https://images.unsplash.com/photo-1554415707-6e8cfc93fe23?auto=format&fit=crop&q=80&w=600",
     
     // Original claim (why it was blocked - aggregated reports)
@@ -41,11 +41,11 @@ const initialDisputeCases = [
   {
     id: "CASE-103",
     type: "LISTING_DISPUTE",
-    targetName: "Quyết định gỡ Bài đăng: Căn hộ dịch vụ studio mini giá rẻ",
+    targetName: "Quyết định khóa Phòng: Căn hộ dịch vụ studio mini giá rẻ",
     status: "APPROVED",
     createdAt: "2026-07-01 10:20",
     resolvedAt: "2026-07-01 16:45",
-    resolutionNote: "Đã xác minh thỏa thuận đặt cọc giữ chỗ hợp lệ giữa hai bên. Khôi phục bài đăng hoạt động trở lại.",
+    resolutionNote: "Đã xác minh thỏa thuận đặt cọc giữ chỗ hợp lệ giữa hai bên. Mở khóa và khôi phục trạng thái hoạt động của phòng.",
     
     appellantName: "Lê Hoài Nam",
     appellantRole: "HOST",
@@ -113,7 +113,7 @@ function DisputeResolution() {
           : c
       )
     );
-    message.success("Đã chấp nhận khiếu nại: Đảo ngược hình phạt/Khôi phục tin đăng thành công!");
+    message.success("Đã chấp nhận khiếu nại: Đảo ngược hình phạt/Mở khóa phòng trọ thành công!");
     handleCloseModal();
   };
 
@@ -169,7 +169,7 @@ function DisputeResolution() {
         record.type === "REVIEW_DISPUTE" ? (
           <Tag color="cyan" icon={<SafetyCertificateOutlined />}>Khiếu nại Đánh giá</Tag>
         ) : (
-          <Tag color="magenta" icon={<AlertOutlined />}>Khiếu nại Gỡ bài</Tag>
+          <Tag color="magenta" icon={<AlertOutlined />}>Khiếu nại Khóa phòng</Tag>
         ),
     },
     {
@@ -229,7 +229,7 @@ function DisputeResolution() {
         record.type === "REVIEW_DISPUTE" ? (
           <Tag color="cyan">Khiếu nại Đánh giá</Tag>
         ) : (
-          <Tag color="magenta">Khiếu nại Gỡ bài</Tag>
+          <Tag color="magenta">Khiếu nại Khóa phòng</Tag>
         ),
     },
     {
@@ -306,161 +306,165 @@ function DisputeResolution() {
   ];
 
   return (
-    <div className="bg-surfaceLight/80 backdrop-blur-md rounded-2xl p-6 border border-onBackgroundLight/5 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
-      {/* Header */}
-      <div className="mb-6">
-        <h3 className="text-lg font-bold text-onBackgroundLight tracking-wide">
-          GIẢI QUYẾT KHIẾU NẠI & TRANH CHẤP HAI CHIỀU
-        </h3>
-        <p className="text-sm text-onBackgroundLight/40">
-          Xem xét thông tin đối thoại hai chiều: lý do báo cáo ban đầu đối chiếu song song với minh chứng giải trình từ bên kháng cáo
-        </p>
-      </div>
-
-      {/* Filter toolbar */}
-      <div className="mb-6 flex flex-col md:flex-row md:items-center gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-[0_2px_12px_rgba(15,23,42,0.02)]">
-        <div className="flex-grow text-left">
-          <Input
-            prefix={<SearchOutlined className="text-onBackgroundLight/30" />}
-            placeholder="Tìm theo mã vụ việc, bên kháng nghị hoặc nội dung tranh chấp..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="rounded-xl"
-            allowClear
-          />
+    <div className="double-bezel-outer animate-fade-in">
+      <div className="double-bezel-inner p-6 bg-white/95 backdrop-blur-md">
+        {/* Header */}
+        <div className="mb-6">
+          <h3 className="text-sm font-bold text-onBackgroundLight tracking-wider uppercase">
+            GIẢI QUYẾT KHIẾU NẠI & TRANH CHẤP HAI CHIỀU
+          </h3>
+          <p className="text-xs text-slate-400 font-semibold mt-1">
+            Xem xét thông tin đối thoại hai chiều: lý do báo cáo ban đầu đối chiếu song song với minh chứng giải trình từ bên kháng cáo
+          </p>
         </div>
-        <div className="w-full md:w-64 text-left">
-          <Select
-            value={typeFilter}
-            onChange={(val) => setTypeFilter(val)}
-            options={[
-              { value: "ALL", label: "Tất cả loại tranh chấp" },
-              { value: "REVIEW_DISPUTE", label: "Khiếu nại Đánh giá" },
-              { value: "LISTING_DISPUTE", label: "Khiếu nại Gỡ bài đăng" }
-            ]}
-            className="w-full"
-          />
-        </div>
-      </div>
 
-      {/* Tabs */}
-      <Tabs defaultActiveKey="pendingTab" items={tabItems} className="custom-tabs" />
-
-      {/* Two-sided resolution modal */}
-      <Modal
-        title={
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-bold text-onBackgroundLight">
-              ĐỐI CHIẾU TRANH CHẤP HAI CHIỀU: {selectedCase?.id}
-            </span>
-            <Tag color={selectedCase?.type === "REVIEW_DISPUTE" ? "cyan" : "magenta"}>
-              {selectedCase?.type === "REVIEW_DISPUTE" ? "Review Appeal" : "Listing Takedown Appeal"}
-            </Tag>
+        {/* Filter toolbar */}
+        <div className="mb-6 flex flex-col md:flex-row md:items-center gap-4 bg-slate-50/50 p-4 rounded-2xl border border-slate-100 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]">
+          <div className="flex-grow text-left">
+            <Input
+              prefix={<SearchOutlined className="text-slate-300" />}
+              placeholder="Tìm theo mã vụ việc, bên kháng nghị hoặc nội dung tranh chấp..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              allowClear
+            />
           </div>
-        }
-        open={isModalOpen}
-        onCancel={handleCloseModal}
-        width={850}
-        footer={
-          selectedCase?.status === "PENDING" ? (
-            <div className="flex justify-end gap-3 pt-4 border-t border-onBackgroundLight/10">
-              <button
-                onClick={handleRejectAppeal}
-                className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-150 text-sm font-medium"
-              >
-                BÁC BỎ KHIẾU NẠI (Giữ nguyên phạt)
-              </button>
-              <button
-                onClick={handleApproveAppeal}
-                className="px-5 py-2.5 bg-techMintAccent hover:bg-techMintAccent/90 text-white font-bold rounded-lg transition-colors duration-150 text-sm"
-              >
-                CHẤP NHẬN KHIẾU NẠI (Đảo ngược phạt)
-              </button>
-            </div>
-          ) : (
-            <div className="flex justify-end gap-3 pt-4 border-t border-onBackgroundLight/10">
-              <button
-                onClick={handleCloseModal}
-                className="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg transition-colors duration-150 text-sm font-medium"
-              >
-                ĐÓNG
-              </button>
-            </div>
-          )
-        }
-      >
-        {selectedCase && (
-          <div className="space-y-5 mt-4 text-left max-h-[72vh] overflow-y-auto pr-2">
-            
-            {/* Header info */}
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-              <span className="text-xs text-slate-400 block font-semibold">TÂM ĐIỂM TRANH CHẤP</span>
-              <span className="text-sm font-bold text-slate-800 block mt-0.5">{selectedCase.targetName}</span>
-            </div>
+          <div className="w-full md:w-64 text-left">
+            <Select
+              value={typeFilter}
+              onChange={(val) => setTypeFilter(val)}
+              options={[
+                { value: "ALL", label: "Tất cả loại tranh chấp" },
+                { value: "REVIEW_DISPUTE", label: "Khiếu nại Đánh giá" },
+                { value: "LISTING_DISPUTE", label: "Khiếu nại Khóa phòng trọ" }
+              ]}
+              className="w-full"
+            />
+          </div>
+        </div>
 
-            {/* Side-by-side comparison block */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+        {/* Tabs */}
+        <Tabs defaultActiveKey="pendingTab" items={tabItems} className="custom-tabs" />
+
+        {/* Two-sided resolution modal */}
+        <Modal
+          title={
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-onBackgroundLight tracking-wider uppercase">
+                ĐỐI CHIẾU TRANH CHẤP HAI CHIỀU: {selectedCase?.id}
+              </span>
+              <Tag color={selectedCase?.type === "REVIEW_DISPUTE" ? "processing" : "error"}>
+                {selectedCase?.type === "REVIEW_DISPUTE" ? "Review Appeal" : "Takedown Appeal"}
+              </Tag>
+            </div>
+          }
+          open={isModalOpen}
+          onCancel={handleCloseModal}
+          width={850}
+          footer={
+            selectedCase?.status === "PENDING" ? (
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+                <button
+                  onClick={handleRejectAppeal}
+                  className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all duration-500 ease-premium text-xs font-bold tracking-widest uppercase active:scale-95 shadow-[0_2px_8px_rgba(239,68,68,0.15)]"
+                >
+                  Bác bỏ khiếu nại
+                </button>
+                <button
+                  onClick={handleApproveAppeal}
+                  className="px-5 py-2.5 bg-techMintAccent hover:bg-techMintAccent/90 text-white font-bold rounded-xl transition-all duration-500 ease-premium text-xs tracking-widest uppercase active:scale-95 shadow-[0_2px_8px_rgba(16,185,129,0.15)]"
+                >
+                  Chấp nhận khiếu nại
+                </button>
+              </div>
+            ) : (
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+                <button
+                  onClick={handleCloseModal}
+                  className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-all duration-500 ease-premium text-xs font-bold tracking-widest uppercase active:scale-95 border border-slate-200"
+                >
+                  Đóng
+                </button>
+              </div>
+            )
+          }
+        >
+          {selectedCase && (
+            <div className="space-y-5 mt-4 text-left max-h-[72vh] overflow-y-auto pr-2">
               
-              {/* Left Side: Original Claim / Penalty Reason */}
-              <div className="bg-slate-50/50 p-4 rounded-xl border border-slate-200 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-[10px] font-bold text-red-500 uppercase tracking-wider">
-                      BÊN NGUYÊN CÁO (Báo cáo/Đánh giá gốc)
-                    </span>
-                    <Tag color="error">Cáo buộc</Tag>
-                  </div>
-                  <span className="text-sm font-bold text-slate-800 block mb-1">
-                    {selectedCase.originalAuthorName}
-                  </span>
-                  <p className="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-150 leading-relaxed font-medium">
-                    {selectedCase.originalComment}
-                  </p>
-                </div>
-                <div className="mt-4 text-xs text-slate-400 italic">
-                  * Lý do hệ thống áp dụng hạn chế / gỡ bài viết lúc đầu.
-                </div>
+              {/* Header info */}
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                <span className="text-[10px] text-slate-400 block font-bold uppercase tracking-wider">TÂM ĐIỂM TRANH CHẤP</span>
+                <span className="text-xs font-bold text-slate-700 block mt-1">{selectedCase.targetName}</span>
               </div>
 
-              {/* Right Side: Appellant Appeal & New Evidence */}
-              <div className="bg-blue-50/20 p-4 rounded-xl border border-blue-100 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">
-                      BÊN BỊ CÁO (Yêu cầu kháng nghị)
-                    </span>
-                    <Tag color="processing">Kháng nghị</Tag>
-                  </div>
-                  <span className="text-sm font-bold text-slate-800 block mb-1">
-                    {selectedCase.appellantName} ({selectedCase.appellantRole === "RENTER" ? "Người thuê" : "Chủ nhà"})
-                  </span>
-                  <p className="text-xs text-slate-700 bg-white p-3 rounded-lg border border-blue-50 leading-relaxed font-medium mb-3">
-                    {selectedCase.appealReason}
-                  </p>
-
-                  {/* Evidence media */}
-                  {selectedCase.appealEvidenceUrl && (
-                    <div className="space-y-1">
-                      <span className="text-[10px] font-semibold text-slate-400 block">BẰNG CHỨNG GIẢI TRÌNH ĐÍNH KÈM:</span>
-                      <div className="relative rounded-lg overflow-hidden border border-slate-200 w-full max-w-[280px] bg-slate-100">
-                        <img
-                          src={selectedCase.appealEvidenceUrl}
-                          alt="Appeal evidence"
-                          className="w-full h-auto object-contain max-h-40"
-                        />
-                        <div className="absolute bottom-0 inset-x-0 bg-slate-900/60 py-1 text-center text-[10px] text-white backdrop-blur-sm font-semibold">
-                          Click để phóng to ảnh
-                        </div>
+              {/* Side-by-side comparison block */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+                
+                {/* Left Side: Original Claim / Penalty Reason */}
+                <div className="double-bezel-outer p-1 bg-slate-100/50 flex flex-col">
+                  <div className="double-bezel-inner p-4 bg-white/95 flex-grow flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-[9px] font-bold text-red-500 uppercase tracking-widest">
+                          BÊN NGUYÊN CÁO (Cáo buộc)
+                        </span>
+                        <Tag color="error">Cáo buộc</Tag>
                       </div>
+                      <span className="text-xs font-bold text-slate-700 block mb-2">
+                        {selectedCase.originalAuthorName}
+                      </span>
+                      <p className="text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed font-semibold">
+                        {selectedCase.originalComment}
+                      </p>
                     </div>
-                  )}
+                    <div className="mt-4 text-[10px] text-slate-400 font-semibold italic">
+                      * Lý do hệ thống áp dụng hạn chế / khóa phòng trọ lúc đầu.
+                    </div>
+                  </div>
                 </div>
-                <div className="mt-4 text-xs text-slate-400 italic">
-                  * Bằng chứng mới do bên kháng nghị cung cấp làm cơ sở đảo ngược quyết định.
-                </div>
-              </div>
 
-            </div>
+                {/* Right Side: Appellant Appeal & New Evidence */}
+                <div className="double-bezel-outer p-1 bg-slate-100/50 flex flex-col">
+                  <div className="double-bezel-inner p-4 bg-white/95 flex-grow flex flex-col justify-between group">
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-[9px] font-bold text-blue-600 uppercase tracking-widest">
+                          BÊN KHÁNG NGHỊ
+                        </span>
+                        <Tag color="processing">Kháng nghị</Tag>
+                      </div>
+                      <span className="text-xs font-bold text-slate-700 block mb-2">
+                        {selectedCase.appellantName} ({selectedCase.appellantRole === "RENTER" ? "Người thuê" : "Chủ nhà"})
+                      </span>
+                      <p className="text-xs text-slate-600 bg-blue-50/20 p-3 rounded-xl border border-blue-100/50 leading-relaxed font-semibold mb-3">
+                        {selectedCase.appealReason}
+                      </p>
+
+                      {/* Evidence media */}
+                      {selectedCase.appealEvidenceUrl && (
+                        <div className="space-y-1.5">
+                          <span className="text-[9px] font-bold text-slate-400 block uppercase tracking-wider">BẰNG CHỨNG GIẢI TRÌNH:</span>
+                          <div className="relative rounded-xl overflow-hidden border border-slate-100 w-full max-w-[280px] bg-slate-50 shadow-sm">
+                            <img
+                              src={selectedCase.appealEvidenceUrl}
+                              alt="Appeal evidence"
+                              className="w-full h-auto object-contain max-h-40 transition-transform duration-700 ease-premium group-hover:scale-105"
+                            />
+                            <div className="absolute bottom-0 inset-x-0 bg-slate-900/60 py-1 text-center text-[9px] text-white backdrop-blur-sm font-semibold uppercase tracking-wider">
+                              Di chuột để zoom ảnh
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="mt-4 text-[10px] text-slate-400 font-semibold italic">
+                      * Bằng chứng mới do bên kháng nghị cung cấp làm cơ sở đảo ngược quyết định.
+                    </div>
+                  </div>
+                </div>
+
+              </div>
 
             {/* Resolved state information */}
             {selectedCase.status !== "PENDING" && (
@@ -505,6 +509,7 @@ function DisputeResolution() {
           </div>
         )}
       </Modal>
+      </div>
     </div>
   );
 }

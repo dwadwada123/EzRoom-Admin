@@ -163,115 +163,125 @@ function EkycModeration() {
 
   return (
     // Ekyc layout container
-    <div className="bg-surfaceLight/80 backdrop-blur-md rounded-2xl p-6 border border-onBackgroundLight/5 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
-      {/* Title section */}
-      <div className="mb-6">
-        <h3 className="text-lg font-bold text-onBackgroundLight tracking-wide">
-          DANH SÁCH HỒ SƠ CHỜ DUYỆT ĐỊNH DANH (eKYC)
-        </h3>
-        <p className="text-sm text-onBackgroundLight/40">
-          Hệ thống đối chiếu thông tin chứng minh nhân dân/CCCD và ảnh selfie chân dung của chủ trọ
-        </p>
-      </div>
-
-      {/* Verification table */}
-      <div className="overflow-x-auto">
-        <Table
-          dataSource={data}
-          columns={columns}
-          rowKey="id"
-          pagination={{ pageSize: 5 }}
-          className="custom-premium-table"
-        />
-      </div>
-
-      {/* Document verification modal */}
-      <Modal
-        title={
-          <span className="text-lg font-bold text-onBackgroundLight">
-            THÔNG TIN CHI TIẾT HỒ SƠ CỦA: {selectedRecord?.hostName}
-          </span>
-        }
-        open={isModalOpen}
-        onCancel={handleCloseModal}
-        width={900}
-        footer={
-          <div className="flex justify-end gap-3 pt-4 border-t border-onBackgroundLight/10">
-            <button
-              onClick={handleReject}
-              className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all duration-300 text-sm font-semibold active:scale-95 shadow-[0_2px_8px_rgba(239,68,68,0.15)]"
-            >
-              TỪ CHỐI HỒ SƠ
-            </button>
-            <button
-              onClick={handleApprove}
-              className="px-5 py-2.5 bg-techMintAccent hover:bg-techMintAccent/90 text-white font-bold rounded-xl transition-all duration-300 text-sm active:scale-95 shadow-[0_2px_8px_rgba(16,185,129,0.15)]"
-            >
-              PHÊ DUYỆT TÀI KHOẢN
-            </button>
-          </div>
-        }
-      >
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-            {/* Card 1: Front ID */}
-            <div className="bg-backgroundLight border border-onBackgroundLight/5 rounded-2xl p-3 flex flex-col items-center hover:border-techBluePrimary/10 hover:shadow-lg transition-all duration-300 group">
-              <div className="w-full aspect-[4/3] rounded-xl overflow-hidden bg-onBackgroundLight/5 mb-3 flex items-center justify-center">
-                <img
-                  src={selectedRecord?.idFrontUrl}
-                  alt="Mặt trước CCCD"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <span className="text-sm font-medium text-onBackgroundLight/70">
-                Mặt trước CCCD
-              </span>
-            </div>
-
-            {/* Card 2: Back ID */}
-            <div className="bg-backgroundLight border border-onBackgroundLight/5 rounded-2xl p-3 flex flex-col items-center hover:border-techBluePrimary/10 hover:shadow-lg transition-all duration-300 group">
-              <div className="w-full aspect-[4/3] rounded-xl overflow-hidden bg-onBackgroundLight/5 mb-3 flex items-center justify-center">
-                <img
-                  src={selectedRecord?.idBackUrl}
-                  alt="Mặt sau CCCD"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <span className="text-sm font-medium text-onBackgroundLight/70">
-                Mặt sau CCCD
-              </span>
-            </div>
-
-            {/* Card 3: Selfie */}
-            <div className="bg-backgroundLight border border-onBackgroundLight/5 rounded-2xl p-3 flex flex-col items-center hover:border-techBluePrimary/10 hover:shadow-lg transition-all duration-300 group">
-              <div className="w-full aspect-[4/3] rounded-xl overflow-hidden bg-onBackgroundLight/5 mb-3 flex items-center justify-center">
-                <img
-                  src={selectedRecord?.selfieUrl}
-                  alt="Ảnh selfie chân dung"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <span className="text-sm font-medium text-onBackgroundLight/70">
-                Ảnh selfie chân dung
-              </span>
-            </div>
-          </div>
-
-          {/* Rejection input field */}
-          <div className="space-y-1.5 border-t border-onBackgroundLight/10 pt-4">
-            <label className="text-xs font-semibold text-onBackgroundLight/50 block">
-              Lý do từ chối phê duyệt (Bắt buộc nếu bấm Từ chối)
-            </label>
-            <Input.TextArea
-              rows={3}
-              placeholder="Nhập lý do chi tiết..."
-              value={rejectionReason}
-              onChange={(e) => setRejectionReason(e.target.value)}
-              className="rounded-xl"
-            />
-          </div>
+    <div className="double-bezel-outer animate-fade-in">
+      <div className="double-bezel-inner p-6 bg-white/95 backdrop-blur-md">
+        {/* Title section */}
+        <div className="mb-6">
+          <h3 className="text-sm font-bold text-onBackgroundLight tracking-wider uppercase">
+            DANH SÁCH HỒ SƠ CHỜ DUYỆT ĐỊNH DANH (eKYC)
+          </h3>
+          <p className="text-xs text-slate-400 font-semibold mt-1">
+            Hệ thống đối chiếu thông tin chứng minh nhân dân/CCCD và ảnh selfie chân dung của chủ trọ
+          </p>
         </div>
-      </Modal>
+
+        {/* Verification table */}
+        <div className="overflow-x-auto">
+          <Table
+            dataSource={data}
+            columns={columns}
+            rowKey="id"
+            pagination={{ pageSize: 5 }}
+            className="custom-premium-table"
+          />
+        </div>
+
+        {/* Document verification modal */}
+        <Modal
+          title={
+            <span className="text-sm font-bold text-onBackgroundLight tracking-wider uppercase">
+              CHI TIẾT HỒ SƠ: {selectedRecord?.hostName}
+            </span>
+          }
+          open={isModalOpen}
+          onCancel={handleCloseModal}
+          width={900}
+          footer={
+            <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+              <button
+                onClick={handleReject}
+                className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all duration-500 ease-premium text-xs font-bold tracking-widest uppercase active:scale-95 shadow-[0_2px_8px_rgba(239,68,68,0.15)]"
+              >
+                Từ chối hồ sơ
+              </button>
+              <button
+                onClick={handleApprove}
+                className="px-5 py-2.5 bg-techMintAccent hover:bg-techMintAccent/90 text-white font-bold rounded-xl transition-all duration-500 ease-premium text-xs tracking-widest uppercase active:scale-95 shadow-[0_2px_8px_rgba(16,185,129,0.15)]"
+              >
+                Phê duyệt tài khoản
+              </button>
+            </div>
+          }
+        >
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+              
+              {/* Card 1: Front ID */}
+              <div className="double-bezel-outer p-1.5 transition-all duration-500 ease-premium hover:shadow-lg hover:border-techBluePrimary/20 group">
+                <div className="double-bezel-inner p-3 bg-slate-50/50 flex flex-col items-center">
+                  <div className="w-full aspect-[4/3] rounded-xl overflow-hidden bg-slate-100 border border-slate-150 mb-3 flex items-center justify-center">
+                    <img
+                      src={selectedRecord?.idFrontUrl}
+                      alt="Mặt trước CCCD"
+                      className="w-full h-full object-cover transition-transform duration-700 ease-premium group-hover:scale-108"
+                    />
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    Mặt trước CCCD
+                  </span>
+                </div>
+              </div>
+
+              {/* Card 2: Back ID */}
+              <div className="double-bezel-outer p-1.5 transition-all duration-500 ease-premium hover:shadow-lg hover:border-techBluePrimary/20 group">
+                <div className="double-bezel-inner p-3 bg-slate-50/50 flex flex-col items-center">
+                  <div className="w-full aspect-[4/3] rounded-xl overflow-hidden bg-slate-100 border border-slate-150 mb-3 flex items-center justify-center">
+                    <img
+                      src={selectedRecord?.idBackUrl}
+                      alt="Mặt sau CCCD"
+                      className="w-full h-full object-cover transition-transform duration-700 ease-premium group-hover:scale-108"
+                    />
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    Mặt sau CCCD
+                  </span>
+                </div>
+              </div>
+
+              {/* Card 3: Selfie */}
+              <div className="double-bezel-outer p-1.5 transition-all duration-500 ease-premium hover:shadow-lg hover:border-techBluePrimary/20 group">
+                <div className="double-bezel-inner p-3 bg-slate-50/50 flex flex-col items-center">
+                  <div className="w-full aspect-[4/3] rounded-xl overflow-hidden bg-slate-100 border border-slate-150 mb-3 flex items-center justify-center">
+                    <img
+                      src={selectedRecord?.selfieUrl}
+                      alt="Ảnh selfie chân dung"
+                      className="w-full h-full object-cover transition-transform duration-700 ease-premium group-hover:scale-108"
+                    />
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    Ảnh selfie chân dung
+                  </span>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Rejection input field */}
+            <div className="space-y-1.5 border-t border-slate-100 pt-4">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                Lý do từ chối phê duyệt (Bắt buộc nếu bấm Từ chối)
+              </label>
+              <Input.TextArea
+                rows={3}
+                placeholder="Nhập lý do chi tiết từ chối phê duyệt định danh..."
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                className="rounded-xl"
+              />
+            </div>
+          </div>
+        </Modal>
+      </div>
     </div>
   );
 }

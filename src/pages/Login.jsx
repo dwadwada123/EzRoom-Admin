@@ -22,61 +22,63 @@ function Login({ onLoginSuccess }) {
 
   return (
     // Centered layout container
-    <div className="w-screen h-screen bg-backgroundLight flex items-center justify-center p-4">
-      {/* Login box card */}
-      <div className="bg-surfaceLight/80 backdrop-blur-md rounded-2xl shadow-2xl p-8 w-full max-w-md border border-onBackgroundLight/5 text-center">
-        {/* Header logo section */}
-        <div className="mb-8">
-          <h2 className="text-3xl font-extrabold text-techBluePrimary tracking-wide drop-shadow-[0_2px_8px_rgba(2,132,199,0.15)]">
-            EzRoom Admin
-          </h2>
-          <p className="text-sm text-onBackgroundLight/50 mt-1.5 font-medium">
-            Hệ thống quản lý nền tảng cho thuê trọ
-          </p>
-        </div>
+    <div className="w-screen h-screen premium-mesh-bg flex items-center justify-center p-4">
+      {/* Double-Bezel nested login card */}
+      <div className="double-bezel-outer w-full max-w-md animate-fade-in">
+        <div className="double-bezel-inner p-8 text-center bg-white/95 backdrop-blur-md">
+          {/* Header logo section */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-extrabold text-techBluePrimary tracking-wider uppercase drop-shadow-[0_2px_6px_rgba(2,132,199,0.08)]">
+              EzRoom Admin
+            </h2>
+            <p className="text-xs text-slate-400 mt-2 font-semibold tracking-wide uppercase">
+              Hệ thống quản lý nền tảng cho thuê trọ
+            </p>
+          </div>
 
-        {/* Login form */}
-        <Form
-          name="login_form"
-          layout="vertical"
-          onFinish={onFinish}
-          requiredMark={false}
-          className="text-left font-medium"
-        >
-          <Form.Item
-            label={<span className="text-xs font-semibold text-onBackgroundLight/60 uppercase tracking-wider">Tài khoản / Email</span>}
-            name="username"
-            rules={[{ required: true, message: "Vui lòng nhập tài khoản hoặc email!" }]}
+          {/* Login form */}
+          <Form
+            name="login_form"
+            layout="vertical"
+            onFinish={onFinish}
+            requiredMark={false}
+            className="text-left font-medium"
           >
-            <Input
-              prefix={<UserOutlined className="text-onBackgroundLight/30" />}
-              placeholder="Nhập tên đăng nhập..."
-              className="rounded-xl py-2"
-            />
-          </Form.Item>
-
-          <Form.Item
-            label={<span className="text-xs font-semibold text-onBackgroundLight/60 uppercase tracking-wider">Mật khẩu</span>}
-            name="password"
-            rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
-          >
-            <Input.Password
-              prefix={<LockOutlined className="text-onBackgroundLight/30" />}
-              placeholder="Nhập mật khẩu..."
-              className="rounded-xl py-2"
-            />
-          </Form.Item>
-
-          <Form.Item className="mt-8 mb-0">
-            <Button
-              type="primary"
-              htmlType="submit"
-              className="w-full py-5 rounded-xl font-bold text-sm bg-techBluePrimary hover:bg-techBluePrimary/90 border-none flex items-center justify-center shadow-[0_4px_14px_rgba(2,132,199,0.2)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
+            <Form.Item
+              label={<span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tài khoản / Email</span>}
+              name="username"
+              rules={[{ required: true, message: "Vui lòng nhập tài khoản hoặc email!" }]}
             >
-              ĐĂNG NHẬP
-            </Button>
-          </Form.Item>
-        </Form>
+              <Input
+                prefix={<UserOutlined className="text-slate-300" />}
+                placeholder="Nhập tên đăng nhập..."
+                className="py-2.5"
+              />
+            </Form.Item>
+
+            <Form.Item
+              label={<span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mật khẩu</span>}
+              name="password"
+              rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
+            >
+              <Input.Password
+                prefix={<LockOutlined className="text-slate-300" />}
+                placeholder="Nhập mật khẩu..."
+                className="py-2.5"
+              />
+            </Form.Item>
+
+            <Form.Item className="mt-8 mb-0">
+              <Button
+                type="primary"
+                htmlType="submit"
+                className="w-full h-11 font-bold text-xs tracking-widest uppercase bg-techBluePrimary hover:bg-techBluePrimary/90 border-none flex items-center justify-center shadow-[0_4px_12px_rgba(2,132,199,0.2)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-500 ease-premium"
+              >
+                Đăng nhập
+              </Button>
+            </Form.Item>
+          </Form>
+        </div>
       </div>
     </div>
   );

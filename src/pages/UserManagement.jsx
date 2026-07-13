@@ -68,6 +68,17 @@ function UserManagement() {
   const [selectedRoleFilter, setSelectedRoleFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [ekycFilter, setEkycFilter] = useState("ALL");
+  const [expandedRowKeys, setExpandedRowKeys] = useState([]);
+
+  // Toggle expand row key helper on row click (excluding buttons clicks)
+  const handleRowClick = (record, event) => {
+    if (event.target.closest("button")) return;
+    setExpandedRowKeys((prevKeys) =>
+      prevKeys.includes(record.id)
+        ? prevKeys.filter((key) => key !== record.id)
+        : [...prevKeys, record.id]
+    );
+  };
 
   // Lock confirmation modal handlers
   const [isLockModalOpen, setIsLockModalOpen] = useState(false);
@@ -162,16 +173,6 @@ function UserManagement() {
       render: (text) => <span className="font-semibold text-onBackgroundLight">{text}</span>,
     },
     {
-      title: "Email tài khoản",
-      dataIndex: "email",
-      key: "email",
-    },
-    {
-      title: "Số điện thoại",
-      dataIndex: "phone",
-      key: "phone",
-    },
-    {
       title: "Vai trò hệ thống",
       dataIndex: "role",
       key: "role",
@@ -204,15 +205,15 @@ function UserManagement() {
         if (record.role === "HOST") {
           const recent = record.recentViolations || 0;
           if (recent === 0) {
-            return <Tag color="green">An toàn (0 vi phạm/30 ngày)</Tag>;
+            return <Tag color="green">An toàn</Tag>;
           }
           if (recent === 1) {
-            return <Tag color="orange">Cảnh báo (1 vi phạm/30 ngày)</Tag>;
+            return <Tag color="orange">Cảnh báo</Tag>;
           }
           return (
             <Space direction="vertical" size={1} className="text-left">
-              <Tag color="red">Rủi ro cao ({recent} vi phạm/30 ngày)</Tag>
-              <span className="text-[10px] text-red-500 font-semibold italic">Đề xuất khóa tài khoản</span>
+              <Tag color="red">Rủi ro cao</Tag>
+              <span className="text-[9px] text-red-500 font-bold italic uppercase tracking-wider">Đề xuất khóa</span>
             </Space>
           );
         }
@@ -277,92 +278,127 @@ function UserManagement() {
 
   return (
     // UserManagement layout wrapper
-    <div className="bg-surfaceLight/80 backdrop-blur-md rounded-2xl p-6 border border-onBackgroundLight/5 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
-      {/* Toolbar & Filter Controllers */}
-      <div className="mb-6 space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h3 className="text-lg font-bold text-onBackgroundLight tracking-wide">
-              QUẢN LÝ TÀI KHOẢN NGƯỜI DÙNG
-            </h3>
-            <p className="text-sm text-onBackgroundLight/40">
-              Tra cứu danh sách thành viên toàn hệ thống và thực thi khóa/mở khóa quyền truy cập tài khoản
-            </p>
+    <div className="double-bezel-outer animate-fade-in">
+      <div className="double-bezel-inner p-6 bg-white/95 backdrop-blur-md">
+        {/* Toolbar & Filter Controllers */}
+        <div className="mb-6 space-y-4">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="text-left">
+              <h3 className="text-sm font-bold text-onBackgroundLight tracking-wider uppercase">
+                QUẢN LÝ TÀI KHOẢN NGƯỜI DÙNG
+              </h3>
+              <p className="text-xs text-slate-400 font-semibold mt-1">
+                Tra cứu danh sách thành viên toàn hệ thống và thực thi khóa/mở khóa quyền truy cập tài khoản
+              </p>
+            </div>
+
+            {/* Safety Index Legend */}
+            <div className="flex flex-wrap items-center gap-3 text-[10px] text-slate-500 font-bold bg-slate-50/50 px-4 py-2.5 rounded-xl border border-slate-100/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.6)]">
+              <span className="text-slate-400 uppercase tracking-wider mr-1">CHÚ GIẢI CHỈ SỐ:</span>
+              <span className="flex items-center gap-1.5"><Tag color="green" className="m-0">An toàn</Tag> 0 vi phạm/30 ngày</span>
+              <span className="flex items-center gap-1.5"><Tag color="orange" className="m-0">Cảnh báo</Tag> 1 vi phạm/30 ngày</span>
+              <span className="flex items-center gap-1.5"><Tag color="red" className="m-0">Rủi ro cao</Tag> &gt;= 2 vi phạm/30 ngày</span>
+            </div>
+          </div>
+
+          <div className="flex flex-col md:flex-row md:items-center gap-4 bg-slate-50/50 p-4 rounded-2xl border border-slate-100 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]">
+            {/* Search bar input */}
+            <div className="flex-grow text-left">
+              <Input
+                prefix={<SearchOutlined className="text-slate-300" />}
+                placeholder="Tìm theo tên, email hoặc SĐT..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                allowClear
+              />
+            </div>
+
+            {/* Role select list */}
+            <div className="w-full md:w-48 text-left">
+              <Select
+                value={selectedRoleFilter}
+                onChange={(value) => setSelectedRoleFilter(value)}
+                options={[
+                  { value: "ALL", label: "Tất cả vai trò" },
+                  { value: "HOST", label: "Chủ nhà (Host)" },
+                  { value: "RENTER", label: "Người thuê (Renter)" }
+                ]}
+                className="w-full"
+              />
+            </div>
+
+            {/* eKYC status filter */}
+            <div className="w-full md:w-48 text-left">
+              <Select
+                value={ekycFilter}
+                onChange={(value) => setEkycFilter(value)}
+                options={[
+                  { value: "ALL", label: "Tất cả eKYC" },
+                  { value: "VERIFIED", label: "Đã xác minh eKYC" },
+                  { value: "UNVERIFIED", label: "Chưa xác minh eKYC" }
+                ]}
+                className="w-full"
+              />
+            </div>
+
+            {/* Status select list */}
+            <div className="w-full md:w-48 text-left">
+              <Select
+                value={statusFilter}
+                onChange={(value) => setStatusFilter(value)}
+                options={[
+                  { value: "ALL", label: "Tất cả trạng thái" },
+                  { value: "ACTIVE", label: "Hoạt động" },
+                  { value: "LOCKED", label: "Đã khóa" }
+                ]}
+                className="w-full"
+              />
+            </div>
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row md:items-center gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-[0_2px_12px_rgba(15,23,42,0.02)]">
-          {/* Search bar input */}
-          <div className="flex-grow text-left">
-            <Input
-              prefix={<SearchOutlined className="text-onBackgroundLight/30" />}
-              placeholder="Tìm theo tên, email hoặc SĐT..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="rounded-xl"
-              allowClear
-            />
-          </div>
-
-          {/* Role select list */}
-          <div className="w-full md:w-48 text-left">
-            <Select
-              value={selectedRoleFilter}
-              onChange={(value) => setSelectedRoleFilter(value)}
-              options={[
-                { value: "ALL", label: "Tất cả vai trò" },
-                { value: "HOST", label: "Chủ nhà (Host)" },
-                { value: "RENTER", label: "Người thuê (Renter)" }
-              ]}
-              className="w-full"
-            />
-          </div>
-
-          {/* eKYC status filter */}
-          <div className="w-full md:w-48 text-left">
-            <Select
-              value={ekycFilter}
-              onChange={(value) => setEkycFilter(value)}
-              options={[
-                { value: "ALL", label: "Tất cả eKYC" },
-                { value: "VERIFIED", label: "Đã xác minh eKYC" },
-                { value: "UNVERIFIED", label: "Chưa xác minh eKYC" }
-              ]}
-              className="w-full"
-            />
-          </div>
-
-          {/* Status select list */}
-          <div className="w-full md:w-48 text-left">
-            <Select
-              value={statusFilter}
-              onChange={(value) => setStatusFilter(value)}
-              options={[
-                { value: "ALL", label: "Tất cả trạng thái" },
-                { value: "ACTIVE", label: "Hoạt động" },
-                { value: "LOCKED", label: "Đã khóa" }
-              ]}
-              className="w-full"
-            />
-          </div>
+        {/* Users table */}
+        <div className="overflow-x-auto animate-fade-in">
+          <Table
+            dataSource={filteredUsers}
+            columns={columns}
+            rowKey="id"
+            pagination={{ pageSize: 5 }}
+            expandable={{
+              expandedRowKeys,
+              onExpand: (expanded, record) => {
+                setExpandedRowKeys((prevKeys) =>
+                  expanded
+                    ? [...prevKeys, record.id]
+                    : prevKeys.filter((key) => key !== record.id)
+                );
+              },
+              expandedRowRender: (record) => (
+                <div className="bg-slate-50/50 p-4 rounded-xl border border-slate-100 flex flex-col sm:flex-row gap-6 text-xs text-left animate-fade-in shadow-inner">
+                  <div>
+                    <span className="text-slate-400 block font-bold uppercase tracking-wider text-[10px]">Email tài khoản</span>
+                    <span className="font-semibold text-slate-700 block mt-1">{record.email}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block font-bold uppercase tracking-wider text-[10px]">Số điện thoại liên hệ</span>
+                    <span className="font-semibold text-slate-700 block mt-1">{record.phone}</span>
+                  </div>
+                </div>
+              ),
+              rowExpandable: () => true,
+            }}
+            onRow={(record) => ({
+              onClick: (event) => handleRowClick(record, event),
+              className: "cursor-pointer select-none"
+            })}
+            className="custom-premium-table"
+          />
         </div>
-      </div>
 
-      {/* Users table */}
-      <div className="overflow-x-auto">
-        <Table
-          dataSource={filteredUsers}
-          columns={columns}
-          rowKey="id"
-          pagination={{ pageSize: 5 }}
-          className="custom-premium-table"
-        />
-      </div>
-
-      {/* Lock confirmation modal dialog */}
-      <Modal
-        title={<span className="text-lg font-bold text-red-500">XÁC NHẬN KHÓA TÀI KHOẢN</span>}
-        open={isLockModalOpen}
+        {/* Lock confirmation modal dialog */}
+        <Modal
+          title={<span className="text-sm font-bold text-red-500 tracking-wider uppercase">XÁC NHẬN KHÓA TÀI KHOẢN</span>}
+          open={isLockModalOpen}
         onCancel={handleCloseLockModal}
         onOk={handleConfirmLock}
         okText="Khóa tài khoản"
@@ -408,6 +444,7 @@ function UserManagement() {
           </div>
         )}
       </Modal>
+      </div>
     </div>
   );
 }

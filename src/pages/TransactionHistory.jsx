@@ -182,12 +182,12 @@ function TransactionHistory() {
       key: "type",
       render: (type) => {
         if (type === "DEPOSIT") {
-          return <Tag color="cyan">Cọc giữ chỗ</Tag>;
+          return <Tag color="processing">Cọc giữ chỗ</Tag>;
         }
         if (type === "RENT") {
-          return <Tag color="green">Tiền phòng</Tag>;
+          return <Tag color="success">Tiền phòng</Tag>;
         }
-        return <Tag color="red">Đền bù tài sản</Tag>;
+        return <Tag color="error">Đền bù tài sản</Tag>;
       },
     },
     {
@@ -207,7 +207,7 @@ function TransactionHistory() {
       key: "commission",
       render: (val, record) => {
         if (record.type !== "RENT") {
-          return <span className="text-slate-400 text-xs">Không thu (0 đ)</span>;
+          return <span className="text-slate-300 text-xs font-semibold">Không thu</span>;
         }
         return (
           <span className="text-techBluePrimary font-bold">
@@ -225,7 +225,7 @@ function TransactionHistory() {
             setSelectedTx(record);
             setIsModalOpen(true);
           }}
-          className="text-techBluePrimary font-semibold hover:text-techBluePrimary/80 transition-all duration-300 text-sm hover:underline"
+          className="text-techBluePrimary font-semibold hover:text-techBluePrimary/80 transition-all duration-500 ease-premium text-sm hover:underline"
         >
           Chi tiết đối soát
         </button>
@@ -234,236 +234,238 @@ function TransactionHistory() {
   ];
 
   return (
-    <div className="bg-surfaceLight/80 backdrop-blur-md rounded-2xl p-6 border border-onBackgroundLight/5 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
-      {/* Title section */}
-      <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h3 className="text-lg font-bold text-onBackgroundLight tracking-wide">
-            NHẬT KÝ GIAO DỊCH & ĐỐI SOÁT DOANH THU
-          </h3>
-          <p className="text-sm text-onBackgroundLight/40">
-            Hệ thống tự động theo dõi dòng tiền thanh toán và trích xuất hoa hồng 5% từ tiền phòng thuê thực tế
-          </p>
+    <div className="double-bezel-outer">
+      <div className="double-bezel-inner p-6 bg-white/95 backdrop-blur-md">
+        {/* Title section */}
+        <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h3 className="text-sm font-bold text-onBackgroundLight tracking-wider uppercase">
+              NHẬT KÝ GIAO DỊCH & ĐỐI SOÁT DOANH THU
+            </h3>
+            <p className="text-xs text-slate-400 font-semibold mt-1">
+              Hệ thống tự động theo dõi dòng tiền thanh toán và trích xuất hoa hồng 5% từ tiền phòng thuê thực tế
+            </p>
+          </div>
         </div>
-      </div>
 
-      {/* Toolbar filters wrapper */}
-      <div className="mb-6 flex flex-wrap items-end gap-4 bg-backgroundLight p-4 rounded-xl border border-onBackgroundLight/5">
-        {/* Transaction type filter */}
-        <div className="flex flex-col gap-1 text-left flex-1 min-w-[200px]">
-          <span className="text-xs font-semibold text-onBackgroundLight/50">LOẠI GIAO DỊCH</span>
-          <Select
-            value={typeFilter}
-            onChange={(value) => setTypeFilter(value)}
-            options={[
-              { value: "ALL", label: "Tất cả loại giao dịch" },
-              { value: "DEPOSIT", label: "Tiền cọc giữ chỗ" },
-              { value: "RENT", label: "Tiền phòng hàng tháng" },
-              { value: "COMPENSATION", label: "Tiền đền bù thiệt hại" }
-            ]}
-            className="w-full"
+        {/* Toolbar filters wrapper */}
+        <div className="mb-6 flex flex-wrap items-end gap-4 bg-slate-50/50 p-4 rounded-2xl border border-slate-100 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]">
+          {/* Transaction type filter */}
+          <div className="flex flex-col gap-1.5 text-left flex-1 min-w-[200px]">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">LOẠI GIAO DỊCH</span>
+            <Select
+              value={typeFilter}
+              onChange={(value) => setTypeFilter(value)}
+              options={[
+                { value: "ALL", label: "Tất cả loại giao dịch" },
+                { value: "DEPOSIT", label: "Tiền cọc giữ chỗ" },
+                { value: "RENT", label: "Tiền phòng hàng tháng" },
+                { value: "COMPENSATION", label: "Tiền đền bù thiệt hại" }
+              ]}
+              className="w-full"
+            />
+          </div>
+
+          {/* Payment method filter */}
+          <div className="flex flex-col gap-1.5 text-left flex-1 min-w-[200px]">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">CỔNG THANH TOÁN</span>
+            <Select
+              value={methodFilter}
+              onChange={(value) => setMethodFilter(value)}
+              options={[
+                { value: "ALL", label: "Tất cả cổng thanh toán" },
+                { value: "MOMO", label: "Ví điện tử MoMo" },
+                { value: "VNPAY", label: "Cổng VNPAY" }
+              ]}
+              className="w-full"
+            />
+          </div>
+
+          {/* Search keyword query input */}
+          <div className="flex flex-col gap-1.5 text-left flex-1 min-w-[240px]">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">TÌM KIẾM CHI TIẾT</span>
+            <Input
+              prefix={<SearchOutlined className="text-slate-300" />}
+              placeholder="Tìm theo mã GD, phòng, chủ nhà..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              className="w-full"
+              allowClear
+            />
+          </div>
+        </div>
+
+        {/* Transaction list table */}
+        <div className="overflow-x-auto">
+          <Table
+            dataSource={filteredTransactions}
+            columns={columns}
+            rowKey="id"
+            pagination={{ pageSize: 5 }}
+            className="custom-premium-table"
           />
         </div>
 
-        {/* Payment method filter */}
-        <div className="flex flex-col gap-1 text-left flex-1 min-w-[200px]">
-          <span className="text-xs font-semibold text-onBackgroundLight/50">CỔNG THANH TOÁN</span>
-          <Select
-            value={methodFilter}
-            onChange={(value) => setMethodFilter(value)}
-            options={[
-              { value: "ALL", label: "Tất cả cổng thanh toán" },
-              { value: "MOMO", label: "Ví điện tử MoMo" },
-              { value: "VNPAY", label: "Cổng VNPAY" }
-            ]}
-            className="w-full"
-          />
-        </div>
-
-        {/* Search keyword query input */}
-        <div className="flex flex-col gap-1 text-left flex-1 min-w-[240px]">
-          <span className="text-xs font-semibold text-onBackgroundLight/50">TÌM KIẾM CHI TIẾT</span>
-          <Input
-            prefix={<SearchOutlined className="text-onBackgroundLight/30" />}
-            placeholder="Tìm theo mã GD, phòng, chủ nhà..."
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            className="w-full rounded-xl"
-            allowClear
-          />
-        </div>
-      </div>
-
-      {/* Transaction list table */}
-      <div className="overflow-x-auto">
-        <Table
-          dataSource={filteredTransactions}
-          columns={columns}
-          rowKey="id"
-          pagination={{ pageSize: 5 }}
-          className="custom-premium-table"
-        />
-      </div>
-
-      {/* Financial Audit Details Modal */}
-      <Modal
-        title={
-          <span className="text-lg font-bold text-onBackgroundLight">
-            CHI TIẾT ĐỐI SOÁT HÓA ĐƠN: {selectedTx?.id}
-          </span>
-        }
-        open={isModalOpen}
-        onCancel={() => {
-          setSelectedTx(null);
-          setIsModalOpen(false);
-        }}
-        width={650}
-        footer={null}
-      >
-        {selectedTx && (
-          <div className="space-y-4 mt-4 text-left">
-            {/* General Info */}
-            <div className="grid grid-cols-2 gap-4 bg-backgroundLight p-4 rounded-xl border border-onBackgroundLight/5">
-              <div>
-                <span className="text-xs text-onBackgroundLight/40 block">Tên phòng trọ</span>
-                <span className="text-sm font-semibold text-onBackgroundLight">{selectedTx.roomName}</span>
+        {/* Financial Audit Details Modal */}
+        <Modal
+          title={
+            <span className="text-sm font-bold text-onBackgroundLight tracking-wider uppercase">
+              CHI TIẾT ĐỐI SOÁT HÓA ĐƠN: {selectedTx?.id}
+            </span>
+          }
+          open={isModalOpen}
+          onCancel={() => {
+            setSelectedTx(null);
+            setIsModalOpen(false);
+          }}
+          width={650}
+          footer={null}
+        >
+          {selectedTx && (
+            <div className="space-y-5 mt-4 text-left">
+              {/* General Info */}
+              <div className="grid grid-cols-2 gap-4 bg-slate-50/50 p-4 rounded-2xl border border-slate-100">
+                <div>
+                  <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Tên phòng trọ</span>
+                  <span className="text-xs font-bold text-slate-700 block mt-1">{selectedTx.roomName}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Chủ trọ</span>
+                  <span className="text-xs font-bold text-slate-700 block mt-1">{selectedTx.hostName}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Kỳ hóa đơn / Ngày tạo</span>
+                  <span className="text-xs font-bold text-slate-700 block mt-1">
+                    Tháng {selectedTx.period || "-"} | {selectedTx.date}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Phương thức thanh toán</span>
+                  <span className="text-xs font-bold text-slate-700 block mt-1">
+                    {selectedTx.method} (Đã thanh toán)
+                  </span>
+                </div>
               </div>
-              <div>
-                <span className="text-xs text-onBackgroundLight/40 block">Chủ trọ</span>
-                <span className="text-sm font-semibold text-onBackgroundLight">{selectedTx.hostName}</span>
-              </div>
-              <div>
-                <span className="text-xs text-onBackgroundLight/40 block">Kỳ hóa đơn / Ngày tạo</span>
-                <span className="text-sm font-semibold text-onBackgroundLight">
-                  Tháng {selectedTx.period || "-"} | {selectedTx.date}
-                </span>
-              </div>
-              <div>
-                <span className="text-xs text-onBackgroundLight/40 block">Phương thức thanh toán</span>
-                <span className="text-sm font-semibold text-onBackgroundLight">
-                  {selectedTx.method} (Đã thanh toán)
-                </span>
-              </div>
-            </div>
 
-            {/* Bill Breakdown */}
-            <div className="space-y-2">
-              <span className="text-xs font-bold text-onBackgroundLight/50 block">CHI TIẾT DÒNG TIỀN HÓA ĐƠN</span>
-              <div className="border border-onBackgroundLight/5 rounded-xl overflow-hidden">
-                <table className="w-full text-sm text-left border-collapse">
-                  <thead>
-                    <tr className="bg-backgroundLight border-b border-onBackgroundLight/5 text-[11px] font-bold text-onBackgroundLight/40 uppercase">
-                      <th className="p-3 pl-4">Hạng mục chi phí</th>
-                      <th className="p-3 text-right">Chi tiết số đo</th>
-                      <th className="p-3 pr-4 text-right">Thành tiền</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {/* Fixed room rent */}
-                    {selectedTx.type === "RENT" && (
-                      <tr className="border-b border-onBackgroundLight/5">
-                        <td className="p-3 pl-4 font-medium text-slate-800">Tiền phòng cố định</td>
-                        <td className="p-3 text-right text-slate-500">-</td>
-                        <td className="p-3 pr-4 text-right font-semibold text-slate-800">
-                          {new Intl.NumberFormat("vi-VN").format(selectedTx.roomPrice)} đ
-                        </td>
+              {/* Bill Breakdown */}
+              <div className="space-y-2">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">CHI TIẾT DÒNG TIỀN HÓA ĐƠN</span>
+                <div className="border border-slate-100 rounded-2xl overflow-hidden shadow-[0_4px_12px_rgba(15,23,42,0.01)]">
+                  <table className="w-full text-xs text-left border-collapse">
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        <th className="p-3 pl-4">Hạng mục chi phí</th>
+                        <th className="p-3 text-right">Chi tiết số đo</th>
+                        <th className="p-3 pr-4 text-right">Thành tiền</th>
                       </tr>
-                    )}
+                    </thead>
+                    <tbody>
+                      {/* Fixed room rent */}
+                      {selectedTx.type === "RENT" && (
+                        <tr className="border-b border-slate-100 bg-white">
+                          <td className="p-3 pl-4 font-semibold text-slate-700">Tiền phòng cố định</td>
+                          <td className="p-3 text-right text-slate-400">-</td>
+                          <td className="p-3 pr-4 text-right font-bold text-slate-700">
+                            {new Intl.NumberFormat("vi-VN").format(selectedTx.roomPrice)} đ
+                          </td>
+                        </tr>
+                      )}
 
-                    {/* Electric */}
-                    {selectedTx.type === "RENT" && selectedTx.newElectricity > selectedTx.oldElectricity && (
-                      <tr className="border-b border-onBackgroundLight/5">
-                        <td className="p-3 pl-4 font-medium text-slate-800">Tiền điện</td>
-                        <td className="p-3 text-right text-slate-500">
-                          {selectedTx.oldElectricity} &rarr; {selectedTx.newElectricity} ({selectedTx.newElectricity - selectedTx.oldElectricity} kWh) &times; {selectedTx.electricityPrice}đ
-                        </td>
-                        <td className="p-3 pr-4 text-right font-semibold text-slate-800">
-                          {new Intl.NumberFormat("vi-VN").format((selectedTx.newElectricity - selectedTx.oldElectricity) * selectedTx.electricityPrice)} đ
-                        </td>
-                      </tr>
-                    )}
+                      {/* Electric */}
+                      {selectedTx.type === "RENT" && selectedTx.newElectricity > selectedTx.oldElectricity && (
+                        <tr className="border-b border-slate-100 bg-white">
+                          <td className="p-3 pl-4 font-semibold text-slate-700">Tiền điện</td>
+                          <td className="p-3 text-right text-slate-400">
+                            {selectedTx.oldElectricity} &rarr; {selectedTx.newElectricity} ({selectedTx.newElectricity - selectedTx.oldElectricity} kWh) &times; {selectedTx.electricityPrice}đ
+                          </td>
+                          <td className="p-3 pr-4 text-right font-bold text-slate-700">
+                            {new Intl.NumberFormat("vi-VN").format((selectedTx.newElectricity - selectedTx.oldElectricity) * selectedTx.electricityPrice)} đ
+                          </td>
+                        </tr>
+                      )}
 
-                    {/* Water */}
-                    {selectedTx.type === "RENT" && selectedTx.newWater > selectedTx.oldWater && (
-                      <tr className="border-b border-onBackgroundLight/5">
-                        <td className="p-3 pl-4 font-medium text-slate-800">Tiền nước</td>
-                        <td className="p-3 text-right text-slate-500">
-                          {selectedTx.oldWater} &rarr; {selectedTx.newWater} ({selectedTx.newWater - selectedTx.oldWater} m³) &times; {selectedTx.waterPrice}đ
-                        </td>
-                        <td className="p-3 pr-4 text-right font-semibold text-slate-800">
-                          {new Intl.NumberFormat("vi-VN").format((selectedTx.newWater - selectedTx.oldWater) * selectedTx.waterPrice)} đ
-                        </td>
-                      </tr>
-                    )}
+                      {/* Water */}
+                      {selectedTx.type === "RENT" && selectedTx.newWater > selectedTx.oldWater && (
+                        <tr className="border-b border-slate-100 bg-white">
+                          <td className="p-3 pl-4 font-semibold text-slate-700">Tiền nước</td>
+                          <td className="p-3 text-right text-slate-400">
+                            {selectedTx.oldWater} &rarr; {selectedTx.newWater} ({selectedTx.newWater - selectedTx.oldWater} m³) &times; {selectedTx.waterPrice}đ
+                          </td>
+                          <td className="p-3 pr-4 text-right font-bold text-slate-700">
+                            {new Intl.NumberFormat("vi-VN").format((selectedTx.newWater - selectedTx.oldWater) * selectedTx.waterPrice)} đ
+                          </td>
+                        </tr>
+                      )}
 
-                    {/* Other costs list */}
-                    {selectedTx.otherCosts?.map((cost, idx) => (
-                      <tr key={idx} className="border-b border-onBackgroundLight/5">
-                        <td className="p-3 pl-4 font-medium text-slate-800">{cost.reason}</td>
-                        <td className="p-3 text-right text-slate-500">-</td>
-                        <td className="p-3 pr-4 text-right font-semibold text-slate-800">
-                          {new Intl.NumberFormat("vi-VN").format(cost.amount)} đ
-                        </td>
-                      </tr>
-                    ))}
+                      {/* Other costs list */}
+                      {selectedTx.otherCosts?.map((cost, idx) => (
+                        <tr key={idx} className="border-b border-slate-100 bg-white">
+                          <td className="p-3 pl-4 font-semibold text-slate-700">{cost.reason}</td>
+                          <td className="p-3 text-right text-slate-400">-</td>
+                          <td className="p-3 pr-4 text-right font-bold text-slate-700">
+                            {new Intl.NumberFormat("vi-VN").format(cost.amount)} đ
+                          </td>
+                        </tr>
+                      ))}
 
-                    {/* Deposit cost details */}
-                    {selectedTx.type === "DEPOSIT" && (
-                      <tr className="border-b border-onBackgroundLight/5">
-                        <td className="p-3 pl-4 font-medium text-slate-800">Tiền đặt cọc giữ chỗ phòng</td>
-                        <td className="p-3 text-right text-slate-500">-</td>
-                        <td className="p-3 pr-4 text-right font-semibold text-slate-800">
+                      {/* Deposit cost details */}
+                      {selectedTx.type === "DEPOSIT" && (
+                        <tr className="border-b border-slate-100 bg-white">
+                          <td className="p-3 pl-4 font-semibold text-slate-700">Tiền đặt cọc giữ chỗ phòng</td>
+                          <td className="p-3 text-right text-slate-400">-</td>
+                          <td className="p-3 pr-4 text-right font-bold text-slate-700">
+                            {new Intl.NumberFormat("vi-VN").format(selectedTx.amount)} đ
+                          </td>
+                        </tr>
+                      )}
+
+                      {/* Total billing amount row */}
+                      <tr className="bg-slate-50/50 font-bold text-slate-800 border-t border-slate-100">
+                        <td className="p-3 pl-4">TỔNG CỘNG HÓA ĐƠN</td>
+                        <td className="p-3 text-right">-</td>
+                        <td className="p-3 pr-4 text-right text-techBluePrimary text-sm font-extrabold">
                           {new Intl.NumberFormat("vi-VN").format(selectedTx.amount)} đ
                         </td>
                       </tr>
-                    )}
-
-                    {/* Total billing amount row */}
-                    <tr className="bg-slate-50 font-bold text-slate-900">
-                      <td className="p-3 pl-4">TỔNG CỘNG HÓA ĐƠN</td>
-                      <td className="p-3 text-right">-</td>
-                      <td className="p-3 pr-4 text-right text-techBluePrimary text-base">
-                        {new Intl.NumberFormat("vi-VN").format(selectedTx.amount)} đ
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
 
-            {/* Platform Audit Section */}
-            <div className="bg-techBluePrimary/5 border border-techBluePrimary/10 rounded-xl p-4 space-y-3">
-              <span className="text-xs font-bold text-techBluePrimary uppercase tracking-wider block">
-                ĐỐI SOÁT PHÍ NỀN TẢNG (ADMIN AUDIT)
-              </span>
+              {/* Platform Audit Section */}
+              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 space-y-3 shadow-[0_4px_12px_rgba(15,23,42,0.015)]">
+                <span className="text-[10px] font-extrabold text-techBluePrimary uppercase tracking-widest block">
+                  ĐỐI SOÁT PHÍ NỀN TẢNG (ADMIN AUDIT)
+                </span>
 
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <span className="text-xs text-slate-500 block">Quy tắc thu hoa hồng</span>
-                  <span className="font-semibold text-slate-700">
-                    {selectedTx.type === "RENT" ? "Thu 5% trên Tiền phòng gốc" : "Không áp dụng (Thu 0%)"}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-xs text-slate-500 block">Số tiền hoa hồng (5%)</span>
-                  <span className="font-bold text-amber-600">
-                    {new Intl.NumberFormat("vi-VN").format(selectedTx.commission)} đ
-                  </span>
-                </div>
-                <div className="col-span-2 pt-2 border-t border-techBluePrimary/10 flex justify-between items-center">
+                <div className="grid grid-cols-2 gap-3 text-xs">
                   <div>
-                    <span className="text-xs text-slate-500">Doanh thu thực chuyển cho Chủ trọ</span>
-                    <p className="text-[10px] text-slate-400">(Tổng cộng hóa đơn - Phí 5% tiền phòng)</p>
+                    <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Quy tắc thu hoa hồng</span>
+                    <span className="font-semibold text-slate-600 block mt-0.5">
+                      {selectedTx.type === "RENT" ? "Thu 5% trên Tiền phòng gốc" : "Không áp dụng (Thu 0%)"}
+                    </span>
                   </div>
-                  <span className="text-base font-bold text-emerald-600">
-                    {new Intl.NumberFormat("vi-VN").format(selectedTx.amount - selectedTx.commission)} đ
-                  </span>
+                  <div>
+                    <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Số tiền hoa hồng (5%)</span>
+                    <span className="font-bold text-amber-600 block mt-0.5">
+                      {new Intl.NumberFormat("vi-VN").format(selectedTx.commission)} đ
+                    </span>
+                  </div>
+                  <div className="col-span-2 pt-3 border-t border-slate-100 flex justify-between items-center">
+                    <div>
+                      <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Doanh thu thực chuyển cho Chủ trọ</span>
+                      <p className="text-[9px] text-slate-400 font-medium">(Tổng cộng hóa đơn - Phí 5% tiền phòng)</p>
+                    </div>
+                    <span className="text-sm font-extrabold text-emerald-600">
+                      {new Intl.NumberFormat("vi-VN").format(selectedTx.amount - selectedTx.commission)} đ
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
-      </Modal>
+          )}
+        </Modal>
+      </div>
     </div>
   );
 }

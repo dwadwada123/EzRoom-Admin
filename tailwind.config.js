@@ -23,6 +23,9 @@ export default {
       },
       fontFamily: {
         sans: ["'Plus Jakarta Sans'", "Inter", "sans-serif"],
+      },
+      transitionTimingFunction: {
+        'premium': 'cubic-bezier(0.32, 0.72, 0, 1)',
       }
     },
   },

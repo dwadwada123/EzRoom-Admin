@@ -19,20 +19,20 @@ const themeConfig = {
     colorSuccess: "#10B981",
     colorBgLayout: "#F8FAFC",
     colorTextBase: "#0F172A",
-    borderRadius: 12,
+    borderRadius: 14,
     fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif",
   },
   components: {
     Button: {
-      borderRadius: 12,
+      borderRadius: 14,
       controlHeight: 40,
     },
     Input: {
-      borderRadius: 12,
+      borderRadius: 14,
       controlHeight: 40,
     },
     Select: {
-      borderRadius: 12,
+      borderRadius: 14,
       controlHeight: 40,
     },
     Table: {
@@ -41,7 +41,7 @@ const themeConfig = {
       rowHoverBg: "rgba(2, 132, 199, 0.03)",
     },
     Modal: {
-      borderRadiusLG: 20,
+      borderRadiusLG: 24,
     },
   },
 };
@@ -50,6 +50,7 @@ const themeConfig = {
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("adminToken"));
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Handle administrator logout
   const handleLogout = () => {
@@ -87,19 +88,31 @@ function App() {
         <Login onLoginSuccess={() => setIsLoggedIn(true)} />
       ) : (
         /* Layout wrapper */
-        <div className="flex h-screen w-screen overflow-hidden bg-backgroundLight">
+        <div className="flex h-screen w-screen overflow-hidden premium-mesh-bg">
           {/* Sidebar navigation */}
-          <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+          <Sidebar 
+            activeTab={activeTab} 
+            setActiveTab={(tab) => {
+              setActiveTab(tab);
+              setSidebarOpen(false); // Auto close sidebar on mobile tap
+            }} 
+            sidebarOpen={sidebarOpen} 
+            setSidebarOpen={setSidebarOpen} 
+          />
 
           {/* Main layout container with padding to create spacing from outer edges */}
-          <div className="flex-grow h-screen p-4 pl-2 flex flex-col">
+          <div className="flex-grow h-screen p-4 lg:pl-2 flex flex-col w-full overflow-hidden">
             {/* Unified Floating Glass Card */}
             <div className="flex-grow h-full bg-surfaceLight/80 backdrop-blur-md rounded-2xl border border-onBackgroundLight/5 shadow-2xl flex flex-col overflow-hidden relative">
               {/* Header */}
-              <Header activeTab={activeTab} onLogout={handleLogout} />
+              <Header 
+                activeTab={activeTab} 
+                onLogout={handleLogout} 
+                onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} 
+              />
 
               {/* Main content viewport scrolling independently */}
-              <main className="p-6 flex-grow overflow-y-auto">
+              <main className="p-4 md:p-6 flex-grow overflow-y-auto">
                 {renderContent()}
               </main>
             </div>
