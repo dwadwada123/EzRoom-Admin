@@ -2,7 +2,7 @@ import { LogoutOutlined, MenuOutlined } from "@ant-design/icons";
 
 // Header component
 function Header({ activeTab, onLogout, onToggleSidebar }) {
-  // Map tab key to uppercase Vietnamese title
+  // Title mapping helper
   const getHeaderTitle = (tab) => {
     switch (tab) {
       case "dashboard":
@@ -16,7 +16,7 @@ function Header({ activeTab, onLogout, onToggleSidebar }) {
       case "amenities":
         return "QUẢN LÝ DANH MỤC TIỆN ÍCH TRỌ";
       case "moderation":
-        return "KIỂM DUYỆT PHÒNG TRỌ";
+        return "KIỂM DUYỆT PHÒNG";
       case "users":
         return "QUẢN LÝ TÀI KHOẢN";
       default:
@@ -25,9 +25,9 @@ function Header({ activeTab, onLogout, onToggleSidebar }) {
   };
 
   return (
-    // Sticky frosted glass header
+    // Header container
     <header className="sticky top-0 w-full h-16 bg-white/70 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-4 md:px-6 z-20 transition-all duration-500 ease-premium">
-      {/* Active tab title */}
+      {/* Title */}
       <div className="flex items-center gap-2">
         <button
           onClick={onToggleSidebar}
@@ -40,10 +40,10 @@ function Header({ activeTab, onLogout, onToggleSidebar }) {
         </h2>
       </div>
 
-      {/* User profile and actions */}
+      {/* User profile */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-3">
-          {/* User squircle avatar */}
+          {/* Avatar */}
           <div className="w-9 h-9 rounded-xl bg-techBluePrimary/10 flex items-center justify-center overflow-hidden border border-techBluePrimary/15 shadow-[inset_0_1px_1px_rgba(255,255,255,0.6)]">
             <svg
               className="w-4 h-4 text-techBluePrimary"

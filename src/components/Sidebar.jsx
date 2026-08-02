@@ -11,21 +11,21 @@ import {
 
 // Sidebar component
 function Sidebar({ activeTab, setActiveTab, sidebarOpen, setSidebarOpen }) {
-  // Append tab item link matrix
+  // Navigation menu items
   const menuItems = [
     { key: "dashboard", label: "Bảng điều khiển", icon: <DashboardOutlined /> },
     { key: "transactions", label: "Lịch sử Giao dịch", icon: <TransactionOutlined /> },
     { key: "ekyc", label: "Duyệt định danh eKYC", icon: <VerifiedOutlined /> },
     { key: "contracts", label: "Quản lý Hợp đồng", icon: <FileTextOutlined /> },
     { key: "amenities", label: "Quản lý Tiện ích", icon: <AppstoreAddOutlined /> },
-    { key: "moderation", label: "Kiểm duyệt phòng trọ", icon: <FileProtectOutlined /> },
+    { key: "moderation", label: "Kiểm duyệt phòng", icon: <FileProtectOutlined /> },
     { key: "users", label: "Quản lý tài khoản", icon: <TeamOutlined /> },
     { key: "disputes", label: "Giải quyết khiếu nại", icon: <AlertOutlined /> },
   ];
 
   return (
     <>
-      {/* Background backdrop overlay for mobile */}
+      {/* Mobile backdrop */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-500 ease-premium"
@@ -33,17 +33,17 @@ function Sidebar({ activeTab, setActiveTab, sidebarOpen, setSidebarOpen }) {
         />
       )}
 
-      {/* Floating Sidebar wrapper with padding */}
+      {/* Sidebar wrapper */}
       <aside 
         className={`fixed lg:static inset-y-0 left-0 w-66 h-screen p-4 lg:pr-2 flex-shrink-0 z-50 transition-transform duration-500 ease-premium lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
-        {/* Double-bezel outer structure */}
+        {/* Outer bezel */}
         <div className="double-bezel-outer h-full">
-          {/* Double-bezel inner core */}
+          {/* Inner container */}
           <div className="double-bezel-inner h-full flex flex-col overflow-hidden bg-white/95 backdrop-blur-md">
-            {/* Sidebar header logo */}
+            {/* Header */}
             <div className="h-16 flex items-center px-6 border-b border-slate-100 bg-slate-50/50 justify-between">
               <span className="text-base font-extrabold text-techBluePrimary tracking-wider uppercase drop-shadow-[0_2px_6px_rgba(2,132,199,0.08)]">
                 EzRoom Admin
@@ -56,7 +56,7 @@ function Sidebar({ activeTab, setActiveTab, sidebarOpen, setSidebarOpen }) {
               </button>
             </div>
 
-            {/* Navigation menu list */}
+            {/* Navigation menu */}
             <nav className="flex-1 py-4 px-3 space-y-1.5 overflow-y-auto">
               {menuItems.map((item) => {
                 const isActive = activeTab === item.key;

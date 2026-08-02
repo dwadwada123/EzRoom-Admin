@@ -1,32 +1,42 @@
 import { Form, Input, Button, message } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
+import API_BASE_URL from "../config/api";
+
 
 // Login component
 function Login({ onLoginSuccess }) {
-  // Submit handler checking credentials
-  const onFinish = (values) => {
+  // Submit handler
+  const onFinish = async (values) => {
     const { username, password } = values;
-    if (
-      (username === "admin" && password === "admin123") ||
-      (username === "admin@ezroom.com" && password === "123456")
-    ) {
-      localStorage.setItem("adminToken", "ezroom_secret_token");
-      message.success("Đăng nhập hệ thống thành công!");
-      if (onLoginSuccess) {
-        onLoginSuccess();
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/auth/admin-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if (data.success) {
+        localStorage.setItem("adminToken", data.token);
+        message.success("Đăng nhập hệ thống thành công!");
+        if (onLoginSuccess) {
+          onLoginSuccess();
+        }
+      } else {
+        message.error(data.error || "Tài khoản hoặc mật khẩu không chính xác!");
       }
-    } else {
-      message.error("Tài khoản hoặc mật khẩu không chính xác!");
+    } catch (error) {
+      console.error("Login failed:", error);
+      message.error("Lỗi kết nối tới máy chủ!");
     }
   };
 
   return (
-    // Centered layout container
+    // Layout container
     <div className="w-screen h-screen premium-mesh-bg flex items-center justify-center p-4">
-      {/* Double-Bezel nested login card */}
+      {/* Login card */}
       <div className="double-bezel-outer w-full max-w-md animate-fade-in">
         <div className="double-bezel-inner p-8 text-center bg-white/95 backdrop-blur-md">
-          {/* Header logo section */}
+          {/* Header */}
           <div className="mb-8">
             <h2 className="text-2xl font-extrabold text-techBluePrimary tracking-wider uppercase drop-shadow-[0_2px_6px_rgba(2,132,199,0.08)]">
               EzRoom Admin

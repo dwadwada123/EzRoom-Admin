@@ -46,19 +46,19 @@ const themeConfig = {
   },
 };
 
-// Root component test UI
+// Root component
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("adminToken"));
   const [activeTab, setActiveTab] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Handle administrator logout
+  // Logout handler
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
     setIsLoggedIn(false);
   };
 
-  // Layout dynamic render matrix
+  // Content renderer
   const renderContent = () => {
     switch (activeTab) {
       case "dashboard":
@@ -87,22 +87,22 @@ function App() {
       {!isLoggedIn ? (
         <Login onLoginSuccess={() => setIsLoggedIn(true)} />
       ) : (
-        /* Layout wrapper */
+        /* Layout */
         <div className="flex h-screen w-screen overflow-hidden premium-mesh-bg">
-          {/* Sidebar navigation */}
+          {/* Sidebar */}
           <Sidebar 
             activeTab={activeTab} 
             setActiveTab={(tab) => {
               setActiveTab(tab);
-              setSidebarOpen(false); // Auto close sidebar on mobile tap
+              setSidebarOpen(false); // Close on mobile
             }} 
             sidebarOpen={sidebarOpen} 
             setSidebarOpen={setSidebarOpen} 
           />
 
-          {/* Main layout container with padding to create spacing from outer edges */}
+          {/* Main layout */}
           <div className="flex-grow h-screen p-4 lg:pl-2 flex flex-col w-full overflow-hidden">
-            {/* Unified Floating Glass Card */}
+            {/* Card wrapper */}
             <div className="flex-grow h-full bg-surfaceLight/80 backdrop-blur-md rounded-2xl border border-onBackgroundLight/5 shadow-2xl flex flex-col overflow-hidden relative">
               {/* Header */}
               <Header 
@@ -111,7 +111,7 @@ function App() {
                 onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} 
               />
 
-              {/* Main content viewport scrolling independently */}
+              {/* Main content */}
               <main className="p-4 md:p-6 flex-grow overflow-y-auto">
                 {renderContent()}
               </main>

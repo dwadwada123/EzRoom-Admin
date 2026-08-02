@@ -1,3 +1,6 @@
+import { useState, useEffect } from "react";
+import API_BASE_URL from "../config/api";
+import { Select } from "antd";
 import {
   UserOutlined,
   HomeOutlined,
@@ -12,33 +15,76 @@ import {
   Tooltip,
   Legend,
   Bar,
-  Line,
   CartesianGrid,
 } from "recharts";
 
-// Analytics dashboard chart data
-const analyticsData = [
-  { name: "Tháng 1", deposit: 120, commission: 6.0 },
-  { name: "Tháng 2", deposit: 155, commission: 7.75 },
-  { name: "Tháng 3", deposit: 180, commission: 9.0 },
-  { name: "Tháng 4", deposit: 220, commission: 11.0 },
-  { name: "Tháng 5", deposit: 248, commission: 12.4 },
-  { name: "Tháng 6", deposit: 310, commission: 15.5 },
-];
-
 // Dashboard component
 function Dashboard() {
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalHosts: 0,
+    ekycHostsPercent: 0,
+    totalRenters: 0,
+    totalProperties: 0,
+    complexProperties: 0,
+    singleProperties: 0,
+    totalRooms: 0,
+    activeRooms: 0,
+    pendingRooms: 0,
+    pendingEkyc: 0,
+  });
+  const [chartData, setChartData] = useState([]);
+  const [chartMonths, setChartMonths] = useState(6); // Month range filter
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const token = localStorage.getItem("adminToken");
+        if (token === null) return;
+        const res = await fetch(`${API_BASE_URL}/api/admin/dashboard-stats`, {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+        // Handle token expiry
+        if (res.status === 401) { localStorage.removeItem("adminToken"); window.location.reload(); return; }
+        const data = await res.json();
+        if (data.success) {
+          setStats(data.stats);
+          setChartData(data.analyticsData);
+        }
+      } catch (err) {
+        console.error("Không thể kết nối đến server backend:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  // Filter chart data by months
+  const visibleChartData = chartData.slice(-chartMonths);
+
+  if (loading) {
+    return (
+      <div className="flex h-full w-full items-center justify-center min-h-[300px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-techBluePrimary"></div>
+      </div>
+    );
+  }
+
   return (
-    // Dashboard main container
+    // Dashboard container
     <div className="space-y-6">
-      {/* Asymmetric main grid layout */}
+      {/* Main grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column (2/3 width): Stats and Revenue Chart */}
+        {/* Left column */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Subgrid for primary stats */}
+          {/* Stats subgrid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
-            {/* Card 1: Users */}
+            {/* Users stat */}
             <div className="double-bezel-outer transition-all duration-500 ease-premium hover:-translate-y-1 hover:shadow-lg group">
               <div className="double-bezel-inner p-6 flex items-start justify-between bg-white/95">
                 <div className="space-y-2">
@@ -52,10 +98,10 @@ function Dashboard() {
                     </span>
                   </div>
                   <div className="text-3xl font-extrabold text-onBackgroundLight tracking-tight mt-1">
-                    1,244
+                    {stats.totalUsers.toLocaleString()}
                   </div>
                   <p className="text-[11px] text-slate-400 font-semibold pt-1">
-                    344 Chủ nhà (72% đã duyệt eKYC) | 900 Người thuê
+                    {stats.totalHosts} Chủ nhà ({stats.ekycHostsPercent}% đã duyệt eKYC) | {stats.totalRenters} Người thuê
                   </p>
                 </div>
                 <div className="w-12 h-12 rounded-2xl bg-blue-50/60 border border-blue-100 flex items-center justify-center text-blue-600 text-lg shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] transition-transform duration-500 ease-premium group-hover:scale-115">
@@ -64,7 +110,7 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* Card 2: Rooms & Properties */}
+            {/* Rooms stat */}
             <div className="double-bezel-outer transition-all duration-500 ease-premium hover:-translate-y-1 hover:shadow-lg group">
               <div className="double-bezel-inner p-6 flex items-start justify-between bg-white/95">
                 <div className="space-y-2">
@@ -78,10 +124,10 @@ function Dashboard() {
                     </span>
                   </div>
                   <div className="text-3xl font-extrabold text-onBackgroundLight tracking-tight mt-1">
-                    582 <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">phòng</span>
+                    {stats.totalRooms} <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">phòng</span>
                   </div>
                   <p className="text-[11px] text-slate-400 font-semibold pt-1">
-                    128 Tòa nhà/Dãy trọ | 240 Phòng lẻ
+                    {stats.complexProperties} Dãy trọ (Complex) | {stats.singleProperties} Phòng lẻ
                   </p>
                 </div>
                 <div className="w-12 h-12 rounded-2xl bg-purple-50/60 border border-purple-100 flex items-center justify-center text-purple-600 text-lg shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] transition-transform duration-500 ease-premium group-hover:scale-115">
@@ -92,7 +138,7 @@ function Dashboard() {
 
           </div>
 
-          {/* Revenue chart widget */}
+          {/* Revenue chart */}
           <div className="double-bezel-outer">
             <div className="double-bezel-inner p-6 bg-white/95">
               <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -101,32 +147,42 @@ function Dashboard() {
                     Phân tích doanh thu & Hoa hồng hệ thống (5%)
                   </h3>
                   <p className="text-xs text-slate-400 font-semibold mt-1">
-                    Dữ liệu thống kê 6 tháng gần nhất
+                    Dữ liệu thống kê 6 tháng gần nhất (Tr. đ)
                   </p>
                 </div>
-                <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 px-3 py-1 rounded-full">
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-techMintAccent opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-techMintAccent"></span>
-                  </span>
-                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Cập nhật tự động</span>
+                <div className="flex items-center gap-3">
+                  {/* Month range selector */}
+                  <Select
+                    size="small"
+                    value={chartMonths}
+                    onChange={setChartMonths}
+                    options={[
+                      { value: 3, label: "3 tháng" },
+                      { value: 6, label: "6 tháng" },
+                      { value: 12, label: "12 tháng" },
+                    ]}
+                    className="w-28"
+                  />
+                  <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 px-3 py-1 rounded-full">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-techMintAccent opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-techMintAccent"></span>
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Cập nhật tự động</span>
+                  </div>
                 </div>
               </div>
 
               <div className="h-80 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart
-                    data={analyticsData}
+                    data={visibleChartData}
                     margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
                   >
                     <defs>
                       <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#0284C7" stopOpacity={0.4} />
                         <stop offset="100%" stopColor="#0284C7" stopOpacity={0.02} />
-                      </linearGradient>
-                      <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stopColor="#0284C7" />
-                        <stop offset="100%" stopColor="#10B981" />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#F8FAFC" />
@@ -138,16 +194,6 @@ function Dashboard() {
                       style={{ fontSize: "10px", fontWeight: 600 }}
                     />
                     <YAxis
-                      yAxisId="left"
-                      tickLine={false}
-                      axisLine={false}
-                      stroke="#94A3B8"
-                      style={{ fontSize: "10px", fontWeight: 600 }}
-                      unit=" Tr"
-                    />
-                    <YAxis
-                      yAxisId="right"
-                      orientation="right"
                       tickLine={false}
                       axisLine={false}
                       stroke="#94A3B8"
@@ -173,35 +219,28 @@ function Dashboard() {
                       wrapperStyle={{ fontSize: "11px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.02em" }}
                     />
                     <Bar
-                      yAxisId="left"
                       dataKey="deposit"
                       name="Tổng tiền cọc giao dịch"
                       fill="url(#barGradient)"
                       radius={[6, 6, 0, 0]}
-                      barSize={32}
                     />
-                    <Line
-                      yAxisId="right"
-                      type="monotone"
+                    <Bar
                       dataKey="commission"
-                      name="Tiền hoa hồng thu về (5%)"
-                      stroke="url(#lineGradient)"
-                      strokeWidth={3}
-                      dot={{ r: 4, fill: "#0284C7", strokeWidth: 0 }}
-                      activeDot={{ r: 6 }}
+                      name="Doanh thu hoa hồng 5%"
+                      fill="#10B981"
+                      radius={[6, 6, 0, 0]}
                     />
                   </ComposedChart>
                 </ResponsiveContainer>
               </div>
             </div>
           </div>
-
         </div>
 
-        {/* Right Column (1/3 width): Pending and eKYC Cards */}
+        {/* Right column */}
         <div className="lg:col-span-1 flex flex-col gap-6">
           
-          {/* Card 3: Pending verification */}
+          {/* Pending rooms */}
           <div className="double-bezel-outer transition-all duration-500 ease-premium hover:-translate-y-1 hover:shadow-lg group flex-1 flex flex-col">
             <div className="double-bezel-inner p-6 flex items-start justify-between bg-white/95 flex-grow">
               <div className="space-y-2">
@@ -215,7 +254,7 @@ function Dashboard() {
                   </span>
                 </div>
                 <div className="text-3xl font-extrabold text-amber-600 tracking-tight mt-1">
-                  24
+                  {stats.pendingRooms}
                 </div>
                 <p className="text-[11px] text-slate-400 font-semibold pt-1">
                   Yêu cầu đăng tải mới
@@ -227,7 +266,7 @@ function Dashboard() {
             </div>
           </div>
 
-          {/* Card 4: eKYC processes */}
+          {/* Pending eKYC */}
           <div className="double-bezel-outer transition-all duration-500 ease-premium hover:-translate-y-1 hover:shadow-lg group flex-1 flex flex-col">
             <div className="double-bezel-inner p-6 flex items-start justify-between bg-white/95 flex-grow">
               <div className="space-y-2">
@@ -241,7 +280,7 @@ function Dashboard() {
                   </span>
                 </div>
                 <div className="text-3xl font-extrabold text-emerald-600 tracking-tight mt-1">
-                  12
+                  {stats.pendingEkyc}
                 </div>
                 <p className="text-[11px] text-slate-400 font-semibold pt-1">
                   Hồ sơ xác thực danh tính

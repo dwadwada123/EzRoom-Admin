@@ -1,91 +1,59 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Table, Select, Tag, Button, Input, Modal, message, Space } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
-
-// Users dataset state
-const initialUsers = [
-  {
-    id: "u1",
-    fullName: "Lê Văn Tám",
-    email: "levantam@gmail.com",
-    phone: "0901 234 567",
-    role: "HOST",
-    status: "ACTIVE",
-    isEkycVerified: true,
-    recentViolations: 0,
-    totalViolations: 1
-  },
-  {
-    id: "u2",
-    fullName: "Nguyễn Thị Hoa",
-    email: "hoanguyen@yahoo.com",
-    phone: "0938 888 999",
-    role: "RENTER",
-    status: "ACTIVE",
-    isEkycVerified: false,
-    creditScore: 4.5
-  },
-  {
-    id: "u3",
-    fullName: "Trần Minh Hoàng",
-    email: "tmhoang@outlook.com",
-    phone: "0977 123 456",
-    role: "HOST",
-    status: "LOCKED",
-    lockReason: "Đăng tải thông tin phòng trọ giả mạo",
-    isEkycVerified: true,
-    recentViolations: 3,
-    totalViolations: 4
-  },
-  {
-    id: "u4",
-    fullName: "Phạm Thúy Hằng",
-    email: "thuyhang@gmail.com",
-    phone: "0912 987 654",
-    role: "RENTER",
-    status: "ACTIVE",
-    isEkycVerified: true,
-    creditScore: 4.9
-  },
-  {
-    id: "u5",
-    fullName: "Vũ Quốc Anh",
-    email: "quocanh.vu@gmail.com",
-    phone: "0989 333 444",
-    role: "HOST",
-    status: "ACTIVE",
-    isEkycVerified: false,
-    recentViolations: 1,
-    totalViolations: 2
-  }
-];
+import API_BASE_URL from "../config/api";
 
 function UserManagement() {
-  const [users, setUsers] = useState(initialUsers);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Search and multiple filter states
+  // Filter states
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRoleFilter, setSelectedRoleFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [ekycFilter, setEkycFilter] = useState("ALL");
   const [expandedRowKeys, setExpandedRowKeys] = useState([]);
 
-  // Toggle expand row key helper on row click (excluding buttons clicks)
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const token = localStorage.getItem("adminToken");
+        const res = await fetch(`${API_BASE_URL}/api/admin/users`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (res.status === 401) { localStorage.removeItem("adminToken"); window.location.reload(); return; }
+        const data = await res.json();
+        setUsers(Array.isArray(data) ? data : (Array.isArray(data?.users) ? data.users : []));
+      } catch (err) {
+        console.error("Lỗi lấy danh sách tài khoản:", err);
+        message.error("Lỗi lấy danh sách tài khoản!");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, [refreshTrigger]);
+
+  // Toggle row expand
   const handleRowClick = (record, event) => {
     if (event.target.closest("button")) return;
+    const key = record._id || record.id;
     setExpandedRowKeys((prevKeys) =>
-      prevKeys.includes(record.id)
-        ? prevKeys.filter((key) => key !== record.id)
-        : [...prevKeys, record.id]
+      prevKeys.includes(key)
+        ? prevKeys.filter((k) => k !== key)
+        : [...prevKeys, key]
     );
   };
 
-  // Lock confirmation modal handlers
+  // Lock modal state
   const [isLockModalOpen, setIsLockModalOpen] = useState(false);
   const [userToLock, setUserToLock] = useState(null);
   const [lockReason, setLockReason] = useState("");
 
-  // Unlock confirmation dialog states
+  // Unlock modal state
   const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
   const [userToUnlock, setUserToUnlock] = useState(null);
 
@@ -103,22 +71,36 @@ function UserManagement() {
     setIsLockModalOpen(false);
   };
 
-  // Confirm lock execution
-  const handleConfirmLock = () => {
+  // Execute lock
+  const handleConfirmLock = async () => {
     if (!userToLock) return;
     if (!lockReason.trim()) {
       message.error("Vui lòng nhập lý do khóa tài khoản!");
       return;
     }
 
-    setUsers((prevUsers) =>
-      prevUsers.map((u) =>
-        u.id === userToLock.id ? { ...u, status: "LOCKED", lockReason: lockReason } : u
-      )
-    );
-
-    message.success(`Đã khóa tài khoản thành công với lý do: ${lockReason}`);
-    handleCloseLockModal();
+    try {
+      const token = localStorage.getItem("adminToken");
+      const res = await fetch(`${API_BASE_URL}/api/admin/users/${userToLock._id || userToLock.id}/status`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ status: "LOCKED", lockReason })
+      });
+      const data = await res.json();
+      if (data.success) {
+        message.success(`Đã khóa tài khoản thành công với lý do: ${lockReason}`);
+        handleCloseLockModal();
+        setRefreshTrigger(prev => prev + 1);
+      } else {
+        message.error("Lỗi cập nhật trạng thái khoản!");
+      }
+    } catch (err) {
+      console.error("Lỗi khóa tài khoản:", err);
+      message.error("Lỗi kết nối máy chủ!");
+    }
   };
 
   // Open unlock modal
@@ -133,21 +115,35 @@ function UserManagement() {
     setIsUnlockModalOpen(false);
   };
 
-  // Execute account restoration logic
-  const handleConfirmUnlock = () => {
+  // Execute unlock
+  const handleConfirmUnlock = async () => {
     if (!userToUnlock) return;
 
-    setUsers((prevUsers) =>
-      prevUsers.map((u) =>
-        u.id === userToUnlock.id ? { ...u, status: "ACTIVE", lockReason: undefined } : u
-      )
-    );
-
-    message.success("Đã mở khóa tài khoản thành công!");
-    handleCloseUnlockModal();
+    try {
+      const token = localStorage.getItem("adminToken");
+      const res = await fetch(`${API_BASE_URL}/api/admin/users/${userToUnlock._id || userToUnlock.id}/status`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ status: "ACTIVE", lockReason: "" })
+      });
+      const data = await res.json();
+      if (data.success) {
+        message.success("Đã mở khóa tài khoản thành công!");
+        handleCloseUnlockModal();
+        setRefreshTrigger(prev => prev + 1);
+      } else {
+        message.error("Lỗi mở khóa tài khoản!");
+      }
+    } catch (err) {
+      console.error("Lỗi mở khóa tài khoản:", err);
+      message.error("Lỗi kết nối máy chủ!");
+    }
   };
 
-  // Multi-conditional filtering logic
+  // Filter users
   const filteredUsers = users.filter((user) => {
     const matchRole = selectedRoleFilter === "ALL" || user.role === selectedRoleFilter;
     const matchStatus = statusFilter === "ALL" || user.status === statusFilter;
@@ -155,22 +151,27 @@ function UserManagement() {
       ekycFilter === "ALL" ||
       (ekycFilter === "VERIFIED" && user.isEkycVerified) ||
       (ekycFilter === "UNVERIFIED" && !user.isEkycVerified);
+    
+    const nameStr = user.name || user.fullName || "";
+    const emailStr = user.email || "";
+    const phoneStr = user.phone || "";
+
     const matchSearch =
       !searchQuery.trim() ||
-      user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.phone.toLowerCase().includes(searchQuery.toLowerCase());
+      nameStr.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      emailStr.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      phoneStr.toLowerCase().includes(searchQuery.toLowerCase());
 
     return matchRole && matchStatus && matchEkyc && matchSearch;
   });
 
-  // Table columns definition
+  // Table columns
   const columns = [
     {
       title: "Họ và tên",
-      dataIndex: "fullName",
-      key: "fullName",
-      render: (text) => <span className="font-semibold text-onBackgroundLight">{text}</span>,
+      dataIndex: "name",
+      key: "name",
+      render: (text, record) => <span className="font-semibold text-onBackgroundLight">{text || record.fullName}</span>,
     },
     {
       title: "Vai trò hệ thống",
@@ -203,7 +204,7 @@ function UserManagement() {
       key: "violationsOrCredit",
       render: (_, record) => {
         if (record.role === "HOST") {
-          const recent = record.recentViolations || 0;
+          const recent = record.violations || record.recentViolations || 0;
           if (recent === 0) {
             return <Tag color="green">An toàn</Tag>;
           }
@@ -218,13 +219,20 @@ function UserManagement() {
           );
         }
         
-        const score = record.creditScore || 0;
+        // Renter credit score
+        const score = record.creditScore !== undefined && record.creditScore !== null ? Number(record.creditScore) : null;
+        const reviewCount = record.reviewCount || 0;
+
+        if (score === null || reviewCount === 0) {
+          return <Tag color="default">Chưa có đánh giá</Tag>;
+        }
+
         return (
           <div className="flex flex-col text-left">
             <span className={`font-semibold ${score >= 4.0 ? "text-emerald-600" : score >= 3.0 ? "text-amber-500" : "text-red-500"}`}>
               {score.toFixed(1)} / 5.0
             </span>
-            <span className="text-[10px] text-onBackgroundLight/40 font-medium">Điểm uy tín</span>
+            <span className="text-[10px] text-onBackgroundLight/40 font-medium">({reviewCount} đánh giá)</span>
           </div>
         );
       },
@@ -234,7 +242,7 @@ function UserManagement() {
       dataIndex: "status",
       key: "status",
       render: (status, record) => {
-        if (status === "ACTIVE") {
+        if (status === "ACTIVE" || !status) {
           return <Tag color="#10B981">Hoạt động</Tag>;
         }
         return (
@@ -252,7 +260,7 @@ function UserManagement() {
       key: "action",
       render: (_, record) => (
         <Space size="middle">
-          {record.status === "ACTIVE" ? (
+          {record.status === "ACTIVE" || !record.status ? (
             <Button
               type="primary"
               danger
@@ -277,10 +285,10 @@ function UserManagement() {
   ];
 
   return (
-    // UserManagement layout wrapper
+    // User management container
     <div className="double-bezel-outer animate-fade-in">
       <div className="double-bezel-inner p-6 bg-white/95 backdrop-blur-md">
-        {/* Toolbar & Filter Controllers */}
+        {/* Toolbar */}
         <div className="mb-6 space-y-4">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="text-left">
@@ -292,7 +300,7 @@ function UserManagement() {
               </p>
             </div>
 
-            {/* Safety Index Legend */}
+            {/* Safety index */}
             <div className="flex flex-wrap items-center gap-3 text-[10px] text-slate-500 font-bold bg-slate-50/50 px-4 py-2.5 rounded-xl border border-slate-100/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.6)]">
               <span className="text-slate-400 uppercase tracking-wider mr-1">CHÚ GIẢI CHỈ SỐ:</span>
               <span className="flex items-center gap-1.5"><Tag color="green" className="m-0">An toàn</Tag> 0 vi phạm/30 ngày</span>
@@ -302,7 +310,7 @@ function UserManagement() {
           </div>
 
           <div className="flex flex-col md:flex-row md:items-center gap-4 bg-slate-50/50 p-4 rounded-2xl border border-slate-100 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]">
-            {/* Search bar input */}
+            {/* Search input */}
             <div className="flex-grow text-left">
               <Input
                 prefix={<SearchOutlined className="text-slate-300" />}
@@ -313,7 +321,7 @@ function UserManagement() {
               />
             </div>
 
-            {/* Role select list */}
+            {/* Role filter */}
             <div className="w-full md:w-48 text-left">
               <Select
                 value={selectedRoleFilter}
@@ -327,7 +335,7 @@ function UserManagement() {
               />
             </div>
 
-            {/* eKYC status filter */}
+            {/* eKYC filter */}
             <div className="w-full md:w-48 text-left">
               <Select
                 value={ekycFilter}
@@ -341,7 +349,7 @@ function UserManagement() {
               />
             </div>
 
-            {/* Status select list */}
+            {/* Status filter */}
             <div className="w-full md:w-48 text-left">
               <Select
                 value={statusFilter}
@@ -360,17 +368,19 @@ function UserManagement() {
         {/* Users table */}
         <div className="overflow-x-auto animate-fade-in">
           <Table
+            loading={loading}
             dataSource={filteredUsers}
             columns={columns}
-            rowKey="id"
+            rowKey={(record) => record._id || record.id}
             pagination={{ pageSize: 5 }}
             expandable={{
               expandedRowKeys,
               onExpand: (expanded, record) => {
+                const key = record._id || record.id;
                 setExpandedRowKeys((prevKeys) =>
                   expanded
-                    ? [...prevKeys, record.id]
-                    : prevKeys.filter((key) => key !== record.id)
+                    ? [...prevKeys, key]
+                    : prevKeys.filter((k) => k !== key)
                 );
               },
               expandedRowRender: (record) => (
@@ -395,55 +405,53 @@ function UserManagement() {
           />
         </div>
 
-        {/* Lock confirmation modal dialog */}
+        {/* Lock modal */}
         <Modal
           title={<span className="text-sm font-bold text-red-500 tracking-wider uppercase">XÁC NHẬN KHÓA TÀI KHOẢN</span>}
           open={isLockModalOpen}
-        onCancel={handleCloseLockModal}
-        onOk={handleConfirmLock}
-        okText="Khóa tài khoản"
-        cancelText="Hủy"
-        okButtonProps={{ className: "bg-red-500 hover:bg-red-600 border-none" }}
-      >
-        {userToLock && (
+          onOk={handleConfirmLock}
+          onCancel={handleCloseLockModal}
+          okText="Khóa tài khoản"
+          cancelText="Hủy"
+          okButtonProps={{ danger: true, className: "rounded-xl font-bold" }}
+          cancelButtonProps={{ className: "rounded-xl font-bold" }}
+          className="premium-modal"
+        >
           <div className="space-y-4 py-4 text-left">
-            <p className="text-sm text-onBackgroundLight/80">
-              Bạn có chắc chắn muốn khóa tài khoản của <strong>{userToLock.fullName}</strong> ({userToLock.email})?
+            <p className="text-xs text-slate-500">
+              Bạn đang chuẩn bị khóa tài khoản của <strong>{userToLock ? (userToLock.name || userToLock.fullName) : ""}</strong>. Người dùng sẽ bị mất quyền đăng nhập và các quyền thao tác trên ứng dụng di động ngay lập tức.
             </p>
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-onBackgroundLight/50 block">
-                Lý do khóa tài khoản
-              </label>
+            <div className="space-y-1">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Lý do khóa (bắt buộc)</span>
               <Input.TextArea
                 rows={3}
                 placeholder="Nhập lý do khóa chi tiết..."
                 value={lockReason}
                 onChange={(e) => setLockReason(e.target.value)}
-                className="rounded-lg"
+                className="rounded-xl mt-1"
               />
             </div>
           </div>
-        )}
-      </Modal>
+        </Modal>
 
-      {/* Unlock confirmation modal dialog */}
-      <Modal
-        title={<span className="text-lg font-bold text-techMintAccent">XÁC NHẬN MỞ KHÓA TÀI KHOẢN</span>}
-        open={isUnlockModalOpen}
-        onCancel={handleCloseUnlockModal}
-        onOk={handleConfirmUnlock}
-        okText="Mở khóa tài khoản"
-        cancelText="Hủy"
-        okButtonProps={{ className: "bg-techMintAccent hover:bg-techMintAccent/90 border-none" }}
-      >
-        {userToUnlock && (
+        {/* Unlock modal */}
+        <Modal
+          title={<span className="text-sm font-bold text-techMintAccent tracking-wider uppercase">XÁC NHẬN MỞ KHÓA TÀI KHOẢN</span>}
+          open={isUnlockModalOpen}
+          onOk={handleConfirmUnlock}
+          onCancel={handleCloseUnlockModal}
+          okText="Mở khóa ngay"
+          cancelText="Hủy"
+          okButtonProps={{ className: "bg-techMintAccent border-none hover:bg-techMintAccent/90 rounded-xl font-bold" }}
+          cancelButtonProps={{ className: "rounded-xl font-bold" }}
+          className="premium-modal"
+        >
           <div className="py-4 text-left">
-            <p className="text-sm text-onBackgroundLight/80">
-              Bạn có chắc chắn muốn mở khóa và khôi phục quyền truy cập hệ thống cho thành viên <strong>{userToUnlock.fullName}</strong> ({userToUnlock.email}) không?
+            <p className="text-xs text-slate-500">
+              Xác nhận khôi phục hoạt động cho tài khoản của <strong>{userToUnlock ? (userToUnlock.name || userToUnlock.fullName) : ""}</strong>? Các chỉ số cảnh báo vi phạm trước đó vẫn được giữ lại để tiếp tục giám sát.
             </p>
           </div>
-        )}
-      </Modal>
+        </Modal>
       </div>
     </div>
   );

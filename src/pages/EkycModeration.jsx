@@ -1,103 +1,126 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Table, Modal, Input, message } from "antd";
+import API_BASE_URL from "../config/api";
 
-// eKYC database mock
-const initialEkycData = [
-  {
-    id: "1",
-    hostName: "Nguyễn Văn Hùng",
-    phone: "0912 345 678",
-    dateSubmitted: "07/06/2026",
-    status: "PENDING",
-    idFrontUrl: "https://images.unsplash.com/photo-1554774853-aae0a22c8aa4?auto=format&fit=crop&q=80&w=400",
-    idBackUrl: "https://images.unsplash.com/photo-1554774853-720e96af7061?auto=format&fit=crop&q=80&w=400",
-    selfieUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400",
-  },
-  {
-    id: "2",
-    hostName: "Lê Thị Mai",
-    phone: "0988 777 666",
-    dateSubmitted: "06/06/2026",
-    status: "PENDING",
-    idFrontUrl: "https://images.unsplash.com/photo-1554774853-aae0a22c8aa4?auto=format&fit=crop&q=80&w=400",
-    idBackUrl: "https://images.unsplash.com/photo-1554774853-720e96af7061?auto=format&fit=crop&q=80&w=400",
-    selfieUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=400",
-  },
-  {
-    id: "3",
-    hostName: "Phạm Minh Tuấn",
-    phone: "0905 111 222",
-    dateSubmitted: "05/06/2026",
-    status: "VERIFIED",
-    idFrontUrl: "https://images.unsplash.com/photo-1554774853-aae0a22c8aa4?auto=format&fit=crop&q=80&w=400",
-    idBackUrl: "https://images.unsplash.com/photo-1554774853-720e96af7061?auto=format&fit=crop&q=80&w=400",
-    selfieUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400",
-  },
-  {
-    id: "4",
-    hostName: "Hoàng Thu Thảo",
-    phone: "0934 555 444",
-    dateSubmitted: "04/06/2026",
-    status: "REJECTED",
-    idFrontUrl: "https://images.unsplash.com/photo-1554774853-aae0a22c8aa4?auto=format&fit=crop&q=80&w=400",
-    idBackUrl: "https://images.unsplash.com/photo-1554774853-720e96af7061?auto=format&fit=crop&q=80&w=400",
-    selfieUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400",
-  },
-];
-
-// EkycModeration page component
+// eKYC moderation component
 function EkycModeration() {
-  const [data, setData] = useState(initialEkycData);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
 
-  // Rejection feedback state
+  // Rejection reason state
   const [rejectionReason, setRejectionReason] = useState("");
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  // Open modal handler
+  useEffect(() => {
+    const fetchPendingEkyc = async () => {
+      try {
+        const token = localStorage.getItem("adminToken");
+        const res = await fetch(`${API_BASE_URL}/api/admin/ekyc/pending`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (res.status === 401) { localStorage.removeItem("adminToken"); window.location.reload(); return; }
+        const resData = await res.json();
+        if (Array.isArray(resData)) {
+          const mapped = resData.map(user => ({
+            id: user._id || user.id,
+            hostName: user.name,
+            phone: user.phone,
+            dateSubmitted: user.dateSubmittedEkyc || "Mới nộp",
+            status: user.isEkycVerified ? "VERIFIED" : "PENDING",
+            idCardNumber: user.idCardNumber,
+            // AD-03: Do NOT use fake Unsplash fallbacks – show null so UI renders a clear placeholder
+            idFrontUrl: user.idCardFrontUrl || null,
+            idBackUrl: user.idCardBackUrl || null,
+            selfieUrl: user.selfieUrl || null
+          }));
+          setData(mapped);
+        }
+      } catch (err) {
+        console.error("Lỗi lấy danh sách hồ sơ eKYC:", err);
+        message.error("Lỗi lấy danh sách hồ sơ eKYC!");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPendingEkyc();
+  }, [refreshTrigger]);
+
+  // Open modal
   const handleOpenModal = (record) => {
     setSelectedRecord(record);
     setRejectionReason("");
     setIsModalOpen(true);
   };
 
-  // Close modal handler
+  // Close modal
   const handleCloseModal = () => {
     setSelectedRecord(null);
     setIsModalOpen(false);
   };
 
-  // Approve handler
-  const handleApprove = () => {
+  // Approve eKYC
+  const handleApprove = async () => {
     if (!selectedRecord) return;
-    setData((prevData) =>
-      prevData.map((item) =>
-        item.id === selectedRecord.id ? { ...item, status: "VERIFIED" } : item
-      )
-    );
-    handleCloseModal();
+    try {
+      const token = localStorage.getItem("adminToken");
+      const res = await fetch(`${API_BASE_URL}/api/admin/ekyc/${selectedRecord.id}/moderate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ action: "APPROVE" })
+      });
+      const resData = await res.json();
+      if (resData.success) {
+        message.success("Phê duyệt hồ sơ định danh eKYC thành công!");
+        handleCloseModal();
+        setRefreshTrigger(prev => prev + 1);
+      } else {
+        message.error("Lỗi phê duyệt hồ sơ!");
+      }
+    } catch (err) {
+      console.error("Lỗi phê duyệt hồ sơ eKYC:", err);
+      message.error("Lỗi kết nối máy chủ!");
+    }
   };
 
-  // Reject handler
-  const handleReject = () => {
+  // Reject eKYC
+  const handleReject = async () => {
     if (!selectedRecord) return;
     if (!rejectionReason.trim()) {
       message.error("Vui lòng nhập lý do từ chối phê duyệt!");
       return;
     }
-    setData((prevData) =>
-      prevData.map((item) =>
-        item.id === selectedRecord.id
-          ? { ...item, status: "REJECTED", rejectionReason: rejectionReason }
-          : item
-      )
-    );
-    setRejectionReason("");
-    message.success("Từ chối phê duyệt hồ sơ thành công");
-    handleCloseModal();
+    try {
+      const token = localStorage.getItem("adminToken");
+      const res = await fetch(`${API_BASE_URL}/api/admin/ekyc/${selectedRecord.id}/moderate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ action: "REJECT", note: rejectionReason })
+      });
+      const resData = await res.json();
+      if (resData.success) {
+        message.success("Từ chối phê duyệt hồ sơ thành công!");
+        setRejectionReason("");
+        handleCloseModal();
+        setRefreshTrigger(prev => prev + 1);
+      } else {
+        message.error("Lỗi từ chối phê duyệt!");
+      }
+    } catch (err) {
+      console.error("Lỗi từ chối phê duyệt hồ sơ eKYC:", err);
+      message.error("Lỗi kết nối máy chủ!");
+    }
   };
 
-  // Get status tag UI representation
+  // Status tag helper
   const getStatusTag = (status) => {
     switch (status) {
       case "PENDING":
@@ -123,7 +146,7 @@ function EkycModeration() {
     }
   };
 
-  // Table columns definition
+  // Table columns
   const columns = [
     {
       title: "Chủ nhà",
@@ -162,10 +185,10 @@ function EkycModeration() {
   ];
 
   return (
-    // Ekyc layout container
+    // Layout container
     <div className="double-bezel-outer animate-fade-in">
       <div className="double-bezel-inner p-6 bg-white/95 backdrop-blur-md">
-        {/* Title section */}
+        {/* Header */}
         <div className="mb-6">
           <h3 className="text-sm font-bold text-onBackgroundLight tracking-wider uppercase">
             DANH SÁCH HỒ SƠ CHỜ DUYỆT ĐỊNH DANH (eKYC)
@@ -175,9 +198,10 @@ function EkycModeration() {
           </p>
         </div>
 
-        {/* Verification table */}
+        {/* eKYC table */}
         <div className="overflow-x-auto">
           <Table
+            loading={loading}
             dataSource={data}
             columns={columns}
             rowKey="id"
@@ -186,7 +210,7 @@ function EkycModeration() {
           />
         </div>
 
-        {/* Document verification modal */}
+        {/* Verification modal */}
         <Modal
           title={
             <span className="text-sm font-bold text-onBackgroundLight tracking-wider uppercase">
@@ -216,7 +240,7 @@ function EkycModeration() {
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
               
-              {/* Card 1: Front ID */}
+              {/* Front ID */}
               <div className="double-bezel-outer p-1.5 transition-all duration-500 ease-premium hover:shadow-lg hover:border-techBluePrimary/20 group">
                 <div className="double-bezel-inner p-3 bg-slate-50/50 flex flex-col items-center">
                   <div className="w-full aspect-[4/3] rounded-xl overflow-hidden bg-slate-100 border border-slate-150 mb-3 flex items-center justify-center">
@@ -227,12 +251,12 @@ function EkycModeration() {
                     />
                   </div>
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Mặt trước CCCD
+                    Mặt trước CCCD (Số: {selectedRecord?.idCardNumber})
                   </span>
                 </div>
               </div>
 
-              {/* Card 2: Back ID */}
+              {/* Back ID */}
               <div className="double-bezel-outer p-1.5 transition-all duration-500 ease-premium hover:shadow-lg hover:border-techBluePrimary/20 group">
                 <div className="double-bezel-inner p-3 bg-slate-50/50 flex flex-col items-center">
                   <div className="w-full aspect-[4/3] rounded-xl overflow-hidden bg-slate-100 border border-slate-150 mb-3 flex items-center justify-center">
@@ -248,7 +272,7 @@ function EkycModeration() {
                 </div>
               </div>
 
-              {/* Card 3: Selfie */}
+              {/* Selfie */}
               <div className="double-bezel-outer p-1.5 transition-all duration-500 ease-premium hover:shadow-lg hover:border-techBluePrimary/20 group">
                 <div className="double-bezel-inner p-3 bg-slate-50/50 flex flex-col items-center">
                   <div className="w-full aspect-[4/3] rounded-xl overflow-hidden bg-slate-100 border border-slate-150 mb-3 flex items-center justify-center">

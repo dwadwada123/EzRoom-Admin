@@ -1,125 +1,66 @@
-# EzRoom Admin Dashboard - Hướng Dẫn Chạy Dự Án Local
+# EzRoom Admin Web
 
-Dự án Web Admin Quản trị hệ thống EzRoom được xây dựng bằng **ReactJS + Vite + Tailwind CSS** và thư viện UI **Ant Design**. Giao diện đã được nâng cấp đồng bộ toàn diện với dự án ứng dụng EzRoom Android dựa trên tệp đặc tả kỹ thuật `android_app_spec.md`.
+Trang web quản trị dành cho Quản trị viên (Admin) của hệ thống EzRoom, được xây dựng bằng React, Vite, Tailwind CSS và Ant Design.
 
----
+## 1. Công nghệ sử dụng
 
-## Tính Năng Quản Trị Cốt Lõi (Android Aligned)
+- React 19
+- Vite (Công cụ đóng gói và phát triển frontend nhanh)
+- Tailwind CSS (Thiết kế giao diện hiện đại)
+- Ant Design & Lucide React (Bộ icon và thành phần UI quản trị)
+- Axios (Giao tiếp RESTful API)
 
-Hệ thống Web Admin cung cấp 4 phân hệ chính giúp quản lý dòng tiền và dữ liệu từ ứng dụng Android gửi lên:
+## 2. Yêu cầu hệ thống
 
-1. **Bảng Điều Khiển (Dashboard):**
-   - Thống kê tổng số thành viên và tỷ lệ duyệt danh tính eKYC của Chủ nhà.
-   - Thống kê số lượng cơ sở lưu trú phân tách rõ ràng giữa **Dãy trọ / Tòa nhà (Complex)** và **Phòng đơn lẻ (Standalone)**.
-   - Biểu đồ phân tích doanh thu đối soát hoa hồng 5% theo từng tháng.
+- Node.js: Phiên bản 18.x hoặc mới hơn.
+- Trình quản lý gói: npm hoặc yarn.
+- Server Backend EzRoom đang hoạt động (mặc định tại cổng 3000).
 
-2. **Duyệt & Quản Lý Phòng Trọ (Room Moderation & Management):**
-   - **Chờ kiểm duyệt:** Phê duyệt phòng lẻ hoặc phòng trực thuộc dãy trọ/tòa nhà. Khi kiểm duyệt phòng trong Dãy trọ/Tòa nhà, giao diện hỗ trợ hiển thị **Danh sách phòng chờ duyệt cùng Tòa nhà** để Admin có thể duyệt nhanh hoặc đối soát song song.
-   - **Đồng bộ dữ liệu kỹ thuật Android (v1.0):** Hiển thị bộ sưu tập ảnh thực tế phân loại theo danh mục (*Mặt tiền, Phòng ngủ, WC*), bảng phân rã diện tích chi tiết các phòng chức năng, và **Bản đồ trực quan (Google Maps Pin)** ghim vị trí dựa trên tọa độ GPS (Lat/Lng).
-   - **Đang hiển thị / Đã duyệt:** Quản lý danh sách phòng đang hiển thị trực tiếp trên app Android. Hỗ trợ thao tác **Tạm ẩn phòng** (chuyển trạng thái `HIDDEN`) hoặc **Khóa phòng trọ** (xóa khỏi hệ thống).
-   - **Báo cáo vi phạm:** Xem các lượt khiếu nại thực tế từ khách thuê và đưa ra quyết định khóa phòng vi phạm.
+## 3. Hướng dẫn cài đặt và khởi chạy
 
-3. **Đối Soát Tài Chính & Hoa Hồng (Financial Audit):**
-   - Xem chi tiết từng hóa đơn giao dịch (`Invoice`): Tiền phòng, tiền điện (chỉ số cũ &rarr; chỉ số mới), tiền nước, và chi phí phát sinh khác.
-   - Áp dụng chuẩn công thức hệ thống: **Trích xuất 5% hoa hồng chỉ dựa trên Tiền phòng thuê gốc** (không tính trên điện, nước, cọc, đền bù).
-   - Minh bạch hóa doanh thu thực nhận chuyển cho Chủ nhà (`Doanh thu = Tổng hóa đơn - 5% tiền phòng`).
-
-4. **Quản Lý Tài Khoản Thành Viên (User Management):**
-   - Theo dõi danh sách tài khoản Chủ nhà (`HOST`) và Người thuê (`RENTER`).
-   - **Tối ưu hóa hiển thị (Row-level Click Toggle):** Bảng tài khoản được thu gọn. Khi nhấp vào **bất kỳ ô nào trên hàng người dùng**, chi tiết Email và Số điện thoại liên hệ sẽ trượt xuống hiển thị trực quan.
-   - **Nhãn chỉ số vi phạm rút gọn:** Các trạng thái vi phạm được rút gọn thành **An toàn**, **Cảnh báo**, **Rủi ro cao** đi kèm một bảng **Chú giải chỉ số** đặt ở góc trên bên phải thanh công cụ.
-   - **Quy tắc eKYC:** Trạng thái xác minh danh tính eKYC hiển thị là **"Không yêu cầu"** đối với Người thuê và bắt buộc đối với Chủ nhà.
-   - Hỗ trợ khóa / mở khóa tài khoản vi phạm kèm lý do chi tiết.
-
----
-
-## Yêu Cầu Hệ Thống
-
-Trước khi bắt đầu, hãy đảm bảo máy tính của bạn đã cài đặt các phần mềm sau:
-
-- **Node.js** (Khuyến nghị phiên bản LTS mới nhất từ `v18.x` trở lên)
-- **npm** (Thường đi kèm khi cài đặt Node.js) hoặc **Yarn** / **pnpm**
-
----
-
-## Các Bước Cài Đặt và Chạy Dự Án
-
-### Bước 1: Clone dự án
-
-Tải mã nguồn về máy cục bộ của bạn:
-
-```bash
-git clone https://github.com/dwadwada123/EzRoom-Admin.git
-cd ezroom-admin
-```
-
-### Bước 2: Cài đặt các thư viện phụ thuộc
-
-Do thư mục `node_modules` đã được cấu hình ẩn trong tệp `.gitignore`, bạn cần phục hồi các thư viện:
-
+### Bước 1: Cài đặt dependencies
+Mở terminal tại thư mục gốc của EzRoom-Admin và thực thi lệnh:
 ```bash
 npm install
 ```
 
-### Bước 3: Khởi chạy môi trường phát triển (Local Server)
+### Bước 2: Cấu hình biến môi trường
+Tạo file `.env` từ file mẫu `.env.example`:
+```bash
+cp .env.example .env
+```
 
-Khởi chạy máy chủ phát triển cục bộ:
+Nếu server backend của bạn chạy ở một địa chỉ khác (ví dụ máy chủ từ xa hoặc cổng khác), hãy thay đổi giá trị của biến `VITE_API_URL` trong file `.env`:
+```env
+VITE_API_URL=http://localhost:3000
+```
+Lưu ý: Đối với môi trường phát triển cục bộ, nếu không khai báo `VITE_API_URL`, ứng dụng sẽ tự động trỏ về `http://localhost:3000`.
 
+### Bước 3: Khởi chạy môi trường phát triển (Development)
 ```bash
 npm run dev
 ```
+Truy cập giao diện quản trị tại đường dẫn hiển thị trên terminal (mặc định: `http://localhost:5173`).
 
-Terminal sẽ hiển thị địa chỉ local (thường là `http://localhost:5173`). Bạn hãy mở trình duyệt và truy cập vào địa chỉ này.
-
----
-
-## Thông Tin Tài Khoản Thử Nghiệm
-
-Khi truy cập giao diện lần đầu, hệ thống sẽ yêu cầu đăng nhập. Bạn sử dụng một trong hai tài khoản mẫu dưới đây:
-
-1. **Tài khoản chính:**
-   - **Tài khoản:** `admin@ezroom.com`
-   - **Mật khẩu:** `123456`
-
-2. **Tài khoản dự phòng:**
-   - **Tài khoản:** `admin`
-   - **Mật khẩu:** `admin123`
-
----
-
-## Các Lệnh Hỗ Trợ Khác
-
-- **Biên dịch sản phẩm (Production Build):**
-  Tạo mã nguồn tối ưu hóa trong thư mục `/dist` để sẵn sàng deploy:
-  ```bash
-  npm run build
-  ```
-
-- **Kiểm tra lỗi tĩnh (ESLint):**
-  Kiểm tra và chuẩn hóa cú pháp viết mã ReactJS:
-  ```bash
-  npm run lint
-  ```
-
-- **Xem trước bản Build (Vite Preview):**
-  Chạy thử sản phẩm sau khi đã tối ưu biên dịch ngay tại local:
-  ```bash
-  npm run preview
-  ```
-
----
-
-## Tổng Quan Cấu Trúc Dự Án
-
-```text
-ezroom-admin/
-├── src/
-│   ├── components/      # Các component dùng chung (Sidebar, Header,...)
-│   ├── pages/           # Giao diện quản trị (Dashboard, Moderation, User, Transactions,...)
-│   ├── App.jsx          # Router chính phối hợp layout và kiểm tra token
-│   ├── index.css        # Khai báo cấu hình CSS và nâng cấp Ant Design
-│   └── main.jsx         # Điểm khởi tạo gốc của ReactJS
-├── android_app_spec.md  # Tài liệu đặc tả kỹ thuật liên kết Android & Admin [NEW]
-├── tailwind.config.js   # Cấu hình hệ thống thiết kế thương hiệu EzRoom
-└── package.json         # Danh mục thư viện và script vận hành dự án
+### Bước 4: Đóng gói sản phẩm (Build Production)
+```bash
+npm run build
 ```
+Thư mục `dist/` sẽ được tạo ra chứa mã nguồn tối ưu hóa, sẵn sàng để triển khai lên các dịch vụ lưu trữ như Vercel, Netlify hoặc máy chủ Nginx/Apache.
+
+## 4. Các phân hệ chức năng chính của Quản trị viên
+
+- Bảng điều khiển (Dashboard): Thống kê tổng doanh thu nền tảng, số phòng đang hoạt động, số người dùng và biểu đồ phân tích biến động theo tuần/tháng.
+- Duyệt định danh eKYC: Xem xét hồ sơ xác thực danh tính của Chủ nhà (ảnh CCCD mặt trước, mặt sau và chân dung selfie), thực hiện phê duyệt hoặc từ chối kèm lý do.
+- Kiểm duyệt phòng: Rà soát danh sách tin đăng phòng trọ mới, khóa hoặc gỡ bỏ các bài đăng có dấu hiệu vi phạm quy định nền tảng.
+- Lịch sử giao dịch: Theo dõi toàn bộ dòng tiền bao gồm thanh toán tiền cọc Escrow, thanh toán hóa đơn hàng tháng và các giao dịch giải ngân cho chủ trọ.
+- Quản lý hợp đồng: Giám sát danh sách hợp đồng điện tử trong hệ thống và trạng thái giải ngân tiền cọc.
+- Giải quyết khiếu nại: Tiếp nhận và xử lý các đơn kháng cáo bài đăng từ chủ nhà, đơn khiếu nại hợp đồng và báo cáo vi phạm đánh giá.
+- Quản lý tiện ích: Thêm mới, chỉnh sửa và quản lý danh mục các tiện ích dùng chung trong phòng trọ.
+- Quản lý tài khoản: Quản lý danh sách người dùng trong hệ thống (Người thuê, Chủ nhà), hỗ trợ khóa hoặc mở khóa tài khoản.
+
+## 5. Hướng dẫn kết nối và kiểm thử API
+
+1. Khởi động server Backend tại `http://localhost:3000`.
+2. Kiểm tra file `src/config/api.js` để đảm bảo API Base URL đang được cấu hình đồng bộ với Backend.
+3. Đăng nhập hệ thống quản trị với tài khoản Admin mặc định đã được thiết lập trong Backend.

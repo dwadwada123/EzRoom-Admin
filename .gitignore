@@ -1,46 +1,56 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+# Dependencies
+node_modules/
 
-node_modules
-dist
-dist-ssr
-*.local
+# Production build outputs
+dist/
+dist-ssr/
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-# AI Agent configuration and skills
-.agents/
-.gemini/
-skills/
-skills-lock.json
-
-# Local env files
+# Environment variables (Private)
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# Vite / bundler caches
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor & IDE files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS temporary files
+.DS_Store
+Thumbs.db
+
+# Bundler & Cache
 .eslintcache
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
-# Android app spec reference file
+# Tooling & Generated Specifications (Exclude from Git)
+.artifacts/
+.skills/
+.agents/
+.gemini/
+.cursor/
+.cursorrules
+.cline/
+.clinerules
+.superpowers/
+skills/
+skills-lock.json
+*.artifact.md
 android_app_spec.md
 EzRoom_Technical_Spec_v1.0.md

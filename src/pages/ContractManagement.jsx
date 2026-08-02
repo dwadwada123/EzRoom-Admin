@@ -1,85 +1,52 @@
-import { useState } from "react";
-import { Table, Tag, Input } from "antd";
+import { useState, useEffect } from "react";
+import { Table, Tag, Input, message } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
-
-// Electronic contracts mock dataset
-const initialContracts = [
-  {
-    id: "HD-2026-001",
-    roomName: "Phòng trọ cao cấp có ban công, đủ đồ",
-    renterName: "Phạm Hữu Nghĩa",
-    renterPhone: "0909 123 456",
-    startDate: "01/06/2026",
-    endDate: "01/06/2027",
-    depositAmount: 4500000,
-    depositStatus: "PAID",
-    dateSigned: "31/05/2026",
-  },
-  {
-    id: "HD-2026-002",
-    roomName: "Căn hộ dịch vụ studio mini giá rẻ",
-    renterName: "Nguyễn Minh Anh",
-    renterPhone: "0938 765 432",
-    startDate: "05/06/2026",
-    endDate: "05/12/2026",
-    depositAmount: 3200000,
-    depositStatus: "PAID",
-    dateSigned: "04/06/2026",
-  },
-  {
-    id: "HD-2026-003",
-    roomName: "Phòng trọ ghép tiện nghi cho sinh viên",
-    renterName: "Bùi Thị Minh",
-    renterPhone: "0912 345 678",
-    startDate: "10/06/2026",
-    endDate: "10/06/2027",
-    depositAmount: 1800000,
-    depositStatus: "UNPAID",
-    dateSigned: "08/06/2026",
-  },
-  {
-    id: "HD-2026-004",
-    roomName: "Chung cư mini view hồ Tây cực chill",
-    renterName: "Lê Văn Tám",
-    renterPhone: "0987 654 321",
-    startDate: "15/06/2026",
-    endDate: "15/06/2027",
-    depositAmount: 6000000,
-    depositStatus: "PAID",
-    dateSigned: "12/06/2026",
-  },
-  {
-    id: "HD-2026-005",
-    roomName: "Phòng trọ giá siêu rẻ sát đại học",
-    renterName: "Hoàng Thu Thảo",
-    renterPhone: "0966 333 444",
-    startDate: "20/06/2026",
-    endDate: "20/12/2026",
-    depositAmount: 1200000,
-    depositStatus: "UNPAID",
-    dateSigned: "18/06/2026",
-  },
-];
+import API_BASE_URL from "../config/api";
 
 function ContractManagement() {
-  const [contracts] = useState(initialContracts);
-
-  // Search query local state
+  const [contracts, setContracts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
 
-  // Dynamic search dataset stream
-  const filteredContracts = contracts.filter(
-    (item) =>
-      item.renterName.toLowerCase().includes(searchText.toLowerCase()) ||
-      item.roomName.toLowerCase().includes(searchText.toLowerCase())
-  );
+  useEffect(() => {
+    const fetchContracts = async () => {
+      try {
+        const token = localStorage.getItem("adminToken");
+        const res = await fetch(`${API_BASE_URL}/api/admin/contracts`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (res.status === 401) { localStorage.removeItem("adminToken"); window.location.reload(); return; }
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setContracts(data);
+        }
+      } catch (err) {
+        console.error("Lỗi lấy danh sách hợp đồng:", err);
+        message.error("Lỗi lấy danh sách hợp đồng!");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContracts();
+  }, []);
+
+  // Filter contracts
+  const filteredContracts = contracts.filter((item) => {
+    const renterName = item.renterName || "";
+    const roomName = item.roomName || "";
+    return (
+      renterName.toLowerCase().includes(searchText.toLowerCase()) ||
+      roomName.toLowerCase().includes(searchText.toLowerCase())
+    );
+  });
 
   const columns = [
     {
       title: "Mã hợp đồng",
-      dataIndex: "id",
-      key: "id",
-      render: (text) => <span className="font-mono text-onBackgroundLight/40">{text}</span>,
+      dataIndex: "_id",
+      key: "_id",
+      render: (text, record) => <span className="font-mono text-onBackgroundLight/40">{text || record.id}</span>,
     },
     {
       title: "Phòng trọ",
@@ -113,24 +80,51 @@ function ContractManagement() {
       render: (val) => `${new Intl.NumberFormat("vi-VN").format(val)} đ`,
     },
     {
-      title: "Trạng thái cọc",
+      title: "Trạng thái cọc (Escrow)",
       dataIndex: "depositStatus",
       key: "depositStatus",
       render: (status) => {
-        // Check deposit status in uppercase format
-        if (status === "PAID") {
-          return <Tag color="#10B981">Đã đóng cọc</Tag>;
+        switch (status) {
+          case "UNPAID":
+            return <Tag color="default">Chờ đóng cọc</Tag>;
+          case "FROZEN":
+            return <Tag color="blue">Đang đóng băng</Tag>;
+          case "DISBURSED":
+            return <Tag color="green">Đã giải ngân</Tag>;
+          case "REFUNDED":
+            return <Tag color="orange">Đã hoàn cọc</Tag>;
+          default:
+            return <Tag color="default">{status}</Tag>;
         }
-        return <Tag color="#0284C7">Chờ đóng cọc</Tag>;
+      },
+    },
+    {
+      title: "Trạng thái hợp đồng",
+      dataIndex: "status",
+      key: "status",
+      render: (status) => {
+        switch (status) {
+          case "WAITING_SIGN":
+          case "WAITING_DEPOSIT":
+            return <Tag color="cyan">Chờ ký kết</Tag>;
+          case "ACTIVE":
+            return <Tag color="success">Đang hoạt động</Tag>;
+          case "DISPUTED":
+            return <Tag color="error">Đang tranh chấp</Tag>;
+          case "TERMINATED":
+            return <Tag color="warning">Đã chấm dứt</Tag>;
+          default:
+            return <Tag color="default">{status}</Tag>;
+        }
       },
     },
   ];
 
   return (
-    // Contract layout container
+    // Layout container
     <div className="double-bezel-outer animate-fade-in">
       <div className="double-bezel-inner p-6 bg-white/95 backdrop-blur-md">
-        {/* Toolbar flex row */}
+        {/* Toolbar */}
         <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50 p-4 rounded-2xl border border-slate-100 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]">
           <div>
             <h3 className="text-sm font-bold text-onBackgroundLight tracking-wider uppercase">
@@ -151,12 +145,13 @@ function ContractManagement() {
           </div>
         </div>
 
-        {/* Contract list table */}
+        {/* Contracts table */}
         <div className="overflow-x-auto">
           <Table
+            loading={loading}
             dataSource={filteredContracts}
             columns={columns}
-            rowKey="id"
+            rowKey={(record) => record._id || record.id}
             pagination={{ pageSize: 5 }}
             className="custom-premium-table"
           />

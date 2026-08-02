@@ -1,311 +1,14 @@
-import { useState } from "react";
-import { Tabs, Table, Modal, Input, Badge, Select, message, Tag } from "antd";
+import { useState, useEffect } from "react";
+import { Tabs, Table, Modal, Input, Badge, message, Tag } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
+import API_BASE_URL from "../config/api";
 
-// Moderation datasets aligning with Android Property & Room models
-const initialPendingData = [
-  {
-    id: "p1",
-    title: "Phòng trọ cao cấp có ban công, đủ đồ (P.201)",
-    hostName: "Trần Quốc Bảo",
-    price: 4500000,
-    priceFormatted: "4.500.000 đ/tháng",
-    electricityPrice: 3500,
-    waterPrice: 15000,
-    address: "Quận 3, TP. Hồ Chí Minh",
-    detailedAddress: "Tầng 2 - Phòng 201, 123 Điện Biên Phủ",
-    description: "Phòng trọ diện tích 30m2 đầy đủ nội thất: giường tủ, tủ lạnh, điều hòa, máy giặt. Có ban công thoáng mát hướng gió Nam.",
-    imageUrl: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=600",
-    structure: "SINGLE",
-    floorArea: 30,
-    mezzanineArea: 10,
-    propertyId: "prop1",
-    propertyName: "Tòa nhà Quốc Bảo Luxury",
-    propertyType: "COMPLEX",
-    commonAmenities: [
-      { name: "Thang máy", compensationAmount: 0 },
-      { name: "Bảo vệ 24/7", compensationAmount: 0 },
-      { name: "Camera an ninh", compensationAmount: 0 }
-    ],
-    amenities: [
-      { name: "WiFi", compensationAmount: 500000 },
-      { name: "Điều hòa", compensationAmount: 1000000 },
-      { name: "Máy giặt", compensationAmount: 1500000 },
-      { name: "Nóng lạnh", compensationAmount: 800000 },
-      { name: "Tủ quần áo", compensationAmount: 1200000 }
-    ]
-  },
-  {
-    id: "p1_sub1",
-    title: "Phòng trọ cao cấp có ban công, đủ đồ (P.202)",
-    hostName: "Trần Quốc Bảo",
-    price: 4700000,
-    priceFormatted: "4.700.000 đ/tháng",
-    electricityPrice: 3500,
-    waterPrice: 15000,
-    address: "Quận 3, TP. Hồ Chí Minh",
-    detailedAddress: "Tầng 2 - Phòng 202, 123 Điện Biên Phủ",
-    description: "Phòng diện tích 32m2 có ban công rộng, đầy đủ nội thất cơ bản.",
-    imageUrl: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=600",
-    structure: "SINGLE",
-    floorArea: 32,
-    mezzanineArea: 10,
-    propertyId: "prop1",
-    propertyName: "Tòa nhà Quốc Bảo Luxury",
-    propertyType: "COMPLEX",
-    commonAmenities: [
-      { name: "Thang máy", compensationAmount: 0 },
-      { name: "Bảo vệ 24/7", compensationAmount: 0 }
-    ],
-    amenities: [
-      { name: "WiFi", compensationAmount: 500000 },
-      { name: "Điều hòa", compensationAmount: 1000000 }
-    ]
-  },
-  {
-    id: "p1_sub2",
-    title: "Phòng trọ studio ban công lớn (P.301)",
-    hostName: "Trần Quốc Bảo",
-    price: 5000000,
-    priceFormatted: "5.000.000 đ/tháng",
-    electricityPrice: 3500,
-    waterPrice: 15000,
-    address: "Quận 3, TP. Hồ Chí Minh",
-    detailedAddress: "Tầng 3 - Phòng 301, 123 Điện Biên Phủ",
-    description: "Phòng studio cao cấp nhất tòa nhà, cửa sổ kính tràn viền view phố cực đẹp.",
-    imageUrl: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=600",
-    structure: "SINGLE",
-    floorArea: 35,
-    mezzanineArea: 12,
-    propertyId: "prop1",
-    propertyName: "Tòa nhà Quốc Bảo Luxury",
-    propertyType: "COMPLEX",
-    commonAmenities: [
-      { name: "Thang máy", compensationAmount: 0 },
-      { name: "Bảo vệ 24/7", compensationAmount: 0 }
-    ],
-    amenities: [
-      { name: "WiFi", compensationAmount: 500000 },
-      { name: "Điều hòa", compensationAmount: 1000000 }
-    ]
-  },
-  {
-    id: "p2",
-    title: "Căn hộ dịch vụ studio mini giá rẻ",
-    hostName: "Lê Hoài Nam",
-    price: 3200000,
-    priceFormatted: "3.200.000 đ/tháng",
-    electricityPrice: 4000,
-    waterPrice: 18000,
-    address: "Bình Thạnh, TP. Hồ Chí Minh",
-    detailedAddress: "Số 45/12 Đường D5, Phường 25",
-    description: "Phòng trọ khép kín an ninh tốt, giờ giấc tự do, có chỗ để xe máy miễn phí tầng trệt.",
-    imageUrl: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&q=80&w=600",
-    structure: "APARTMENT",
-    floorArea: 25,
-    mezzanineArea: 0,
-    propertyId: null,
-    propertyName: null,
-    propertyType: "SINGLE",
-    commonAmenities: [],
-    amenities: [
-      { name: "WiFi", compensationAmount: 500000 },
-      { name: "Điều hòa", compensationAmount: 1000000 },
-      { name: "Thang máy", compensationAmount: 0 },
-      { name: "Khóa vân tay", compensationAmount: 1500000 }
-    ]
-  },
-  {
-    id: "p3",
-    title: "Phòng trọ ghép tiện nghi cho sinh viên (Phòng A)",
-    hostName: "Phạm Thu Hương",
-    price: 1800000,
-    priceFormatted: "1.800.000 đ/tháng",
-    electricityPrice: 3500,
-    waterPrice: 15000,
-    address: "Cầu Giấy, Hà Nội",
-    detailedAddress: "Tầng 3, Ngõ 105 Xuân Thủy",
-    description: "Phòng gần các trường Đại học lớn, đầy đủ thiết bị gia dụng dùng chung bếp và phòng khách.",
-    imageUrl: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=600",
-    structure: "WHOLE",
-    floorArea: 75,
-    mezzanineArea: 25,
-    propertyId: "prop2",
-    propertyName: "Dãy trọ sinh viên Thu Hương",
-    propertyType: "COMPLEX",
-    commonAmenities: [
-      { name: "Chỗ để xe", compensationAmount: 0 },
-      { name: "Máy giặt chung", compensationAmount: 0 }
-    ],
-    amenities: [
-      { name: "WiFi", compensationAmount: 500000 },
-      { name: "Điều hòa", compensationAmount: 1000000 },
-      { name: "Máy giặt", compensationAmount: 1500000 },
-      { name: "Tủ lạnh", compensationAmount: 2000000 },
-      { name: "Bếp nấu", compensationAmount: 500000 }
-    ]
-  },
-  {
-    id: "p3_sub1",
-    title: "Phòng trọ ghép tiện nghi cho sinh viên (Phòng B)",
-    hostName: "Phạm Thu Hương",
-    price: 1900000,
-    priceFormatted: "1.900.000 đ/tháng",
-    electricityPrice: 3500,
-    waterPrice: 15000,
-    address: "Cầu Giấy, Hà Nội",
-    detailedAddress: "Tầng 3, Ngõ 105 Xuân Thủy",
-    description: "Phòng trọ ghép chất lượng cao, thoáng mát nhiều ánh sáng.",
-    imageUrl: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=600",
-    structure: "WHOLE",
-    floorArea: 75,
-    mezzanineArea: 25,
-    propertyId: "prop2",
-    propertyName: "Dãy trọ sinh viên Thu Hương",
-    propertyType: "COMPLEX",
-    commonAmenities: [
-      { name: "Chỗ để xe", compensationAmount: 0 }
-    ],
-    amenities: [
-      { name: "WiFi", compensationAmount: 500000 },
-      { name: "Điều hòa", compensationAmount: 1000000 }
-    ]
-  }
-];
-
-const initialReportedData = [
-  {
-    id: "r1",
-    title: "Chung cư mini view hồ Tây cực chill (P.502)",
-    hostName: "Vũ Văn Thanh",
-    price: 6000000,
-    priceFormatted: "6.000.000 đ/tháng",
-    electricityPrice: 3800,
-    waterPrice: 20000,
-    address: "Tây Hồ, Hà Nội",
-    detailedAddress: "Phòng 502, Ngõ 12 Trích Sài",
-    reports: [
-      { reason: "Thông tin ảo" },
-      { reason: "Thông tin ảo" },
-      { reason: "Giá không đúng thực tế" },
-      { reason: "Thông tin ảo" },
-      { reason: "Thông tin ảo" },
-      { reason: "Giá không đúng thực tế" },
-      { reason: "Hình ảnh không trung thực" }
-    ],
-    description: "Căn hộ chung cư mini thực tế không có view hồ và diện tích nhỏ hơn nhiều so với hình ảnh quảng cáo.",
-    imageUrl: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&q=80&w=600",
-    structure: "APARTMENT",
-    floorArea: 45,
-    mezzanineArea: 0,
-    propertyId: "prop3",
-    propertyName: "Lakeview Apartment Tây Hồ",
-    propertyType: "COMPLEX",
-    commonAmenities: [
-      { name: "Thang máy", compensationAmount: 0 },
-      { name: "Bể bơi chung", compensationAmount: 0 },
-      { name: "Sân thượng cafe", compensationAmount: 0 }
-    ],
-    amenities: [
-      { name: "WiFi", compensationAmount: 500000 },
-      { name: "Điều hòa", compensationAmount: 1000000 },
-      { name: "Tủ lạnh lớn", compensationAmount: 2000000 }
-    ]
-  },
-  {
-    id: "r2",
-    title: "Phòng trọ giá siêu rẻ sát đại học",
-    hostName: "Hoàng Đức Duy",
-    price: 1200000,
-    priceFormatted: "1.200.000 đ/tháng",
-    electricityPrice: 3500,
-    waterPrice: 15000,
-    address: "Thủ Đức, TP. Hồ Chí Minh",
-    detailedAddress: "Đường số 8, Phường Linh Trung",
-    reports: [
-      { reason: "Lừa đảo tiền cọc" },
-      { reason: "Lừa đảo tiền cọc" },
-      { reason: "Không liên lạc được" }
-    ],
-    description: "Yêu cầu chuyển khoản đặt cọc giữ phòng trước khi đến xem, sau khi cọc thì chủ nhà khóa số điện thoại.",
-    imageUrl: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=600",
-    structure: "SINGLE",
-    floorArea: 15,
-    mezzanineArea: 5,
-    propertyId: null,
-    propertyName: null,
-    propertyType: "SINGLE",
-    commonAmenities: [],
-    amenities: [
-      { name: "WiFi", compensationAmount: 500000 },
-      { name: "Quạt điện", compensationAmount: 200000 }
-    ]
-  }
-];
-
-// Active Listings dataset (Currently approved listings on the platform)
-const initialActiveData = [
-  {
-    id: "a1",
-    title: "Căn hộ dịch vụ tiện ích khu trung tâm (P.302)",
-    hostName: "Trần Quốc Bảo",
-    price: 5200000,
-    priceFormatted: "5.200.000 đ/tháng",
-    electricityPrice: 3500,
-    waterPrice: 15000,
-    address: "Quận 3, TP. Hồ Chí Minh",
-    detailedAddress: "Tầng 3 - Phòng 302, 123 Điện Biên Phủ",
-    description: "Căn hộ dịch vụ cao cấp, đầy đủ nội thất, giờ giấc tự do, bảo vệ 24/7.",
-    imageUrl: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=600",
-    structure: "APARTMENT",
-    floorArea: 35,
-    mezzanineArea: 0,
-    propertyId: "prop1",
-    propertyName: "Tòa nhà Quốc Bảo Luxury",
-    propertyType: "COMPLEX",
-    commonAmenities: [
-      { name: "Thang máy", compensationAmount: 0 },
-      { name: "Bảo vệ 24/7", compensationAmount: 0 }
-    ],
-    amenities: [
-      { name: "WiFi", compensationAmount: 500000 },
-      { name: "Điều hòa", compensationAmount: 1000000 }
-    ],
-    status: "ACTIVE"
-  },
-  {
-    id: "a2",
-    title: "Phòng trọ ban công thoáng mát Quận 10",
-    hostName: "Đặng Hồng Nhung",
-    price: 3500000,
-    priceFormatted: "3.500.000 đ/tháng",
-    electricityPrice: 3500,
-    waterPrice: 15000,
-    address: "Quận 10, TP. Hồ Chí Minh",
-    detailedAddress: "Đường Cách Mạng Tháng 8",
-    description: "Phòng trọ giá tốt, khu dân cư an ninh, yên tĩnh, sạch sẽ.",
-    imageUrl: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&q=80&w=600",
-    structure: "SINGLE",
-    floorArea: 22,
-    mezzanineArea: 8,
-    propertyId: null,
-    propertyName: null,
-    propertyType: "SINGLE",
-    commonAmenities: [],
-    amenities: [
-      { name: "WiFi", compensationAmount: 500000 },
-      { name: "Điều hòa", compensationAmount: 1000000 }
-    ],
-    status: "ACTIVE"
-  }
-];
-
-// Enrichment mapper for Kotlin EzRoom Android models
+// Room data mapper
 const enrichRoomData = (room) => {
   const baseLat = room.propertyId === "prop1" ? 10.7291 : room.propertyId === "prop2" ? 21.0362 : 10.7626;
   const baseLng = room.propertyId === "prop1" ? 106.7022 : room.propertyId === "prop2" ? 105.7839 : 106.6601;
 
-  // Generate realistic category categories based on index
+  // Fallback images
   const fallbackImages = [
     { url: room.imageUrl, category: "Mặt tiền" },
     { url: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=600", category: "Phòng ngủ" },
@@ -326,16 +29,46 @@ const enrichRoomData = (room) => {
 };
 
 function RoomModeration() {
-  const [pendingData, setPendingData] = useState(() => initialPendingData.map(enrichRoomData));
-  const [reportedData, setReportedData] = useState(() => initialReportedData.map(enrichRoomData));
-  const [activeData, setActiveData] = useState(() => initialActiveData.map(enrichRoomData));
+  const [pendingData, setPendingData] = useState([]);
+  const [reportedData, setReportedData] = useState([]);
+  const [activeData, setActiveData] = useState([]);
+  const [processedData, setProcessedData] = useState([]);
+  const [loading, setLoading] = useState(true);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [modalSource, setModalSource] = useState(""); // "pending", "reported", or "active"
+  const [modalSource, setModalSource] = useState(""); // "pending", "reported", "active", or "processed"
   const [actionReason, setActionReason] = useState("");
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  // Helper to aggregate and sort report reasons by frequency (most to least)
+  useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        const token = localStorage.getItem("adminToken");
+        const res = await fetch(`${API_BASE_URL}/api/admin/rooms/moderation`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (res.status === 401) { localStorage.removeItem("adminToken"); window.location.reload(); return; }
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          const enriched = data.map(enrichRoomData);
+          setPendingData(enriched.filter(r => r.status === 'PENDING'));
+          setActiveData(enriched.filter(r => (r.status === 'ACTIVE' || r.status === 'RENTED' || r.status === 'HIDDEN') && (!r.reports || r.reports.length === 0)));
+          setReportedData(enriched.filter(r => r.status !== 'REMOVED' && r.status !== 'DELETED' && r.reports && r.reports.length > 0));
+          setProcessedData(enriched.filter(r => r.status === 'REMOVED' || r.status === 'DELETED'));
+        }
+      } catch (err) {
+        console.error("Lỗi lấy danh sách phòng trọ:", err);
+        message.error("Lỗi lấy danh sách phòng trọ!");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRooms();
+  }, [refreshTrigger]);
+
+  // Aggregate report reasons
   const getSortedReasons = (reports) => {
     if (!reports || reports.length === 0) return [];
     const counts = {};
@@ -347,30 +80,27 @@ function RoomModeration() {
       .sort((a, b) => b.count - a.count);
   };
 
-  // Search query, structure, and property type filter states
+  // Search state
   const [searchQuery, setSearchQuery] = useState("");
-  const [structureFilter, setStructureFilter] = useState("ALL");
-  const [propertyTypeFilter, setPropertyTypeFilter] = useState("ALL");
 
-  // Filter list dynamically by query search, structural and property config
+  // Filter list by search query
   const getFilteredList = (list) => {
     return list.filter((item) => {
-      const matchSearch =
+      return (
         !searchQuery.trim() ||
         item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (item.propertyName && item.propertyName.toLowerCase().includes(searchQuery.toLowerCase()));
-      const matchStructure = structureFilter === "ALL" || item.structure === structureFilter;
-      const matchPropertyType = propertyTypeFilter === "ALL" || item.propertyType === propertyTypeFilter;
-      return matchSearch && matchStructure && matchPropertyType;
+        (item.propertyName && item.propertyName.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
     });
   };
 
   const filteredPendingData = getFilteredList(pendingData);
   const filteredReportedData = getFilteredList(reportedData);
   const filteredActiveData = getFilteredList(activeData);
+  const filteredProcessedData = getFilteredList(processedData);
 
-  // Open modal handler
+  // Open modal
   const handleOpenModal = (item, source) => {
     setSelectedItem(item);
     setModalSource(source);
@@ -378,107 +108,220 @@ function RoomModeration() {
     setIsModalOpen(true);
   };
 
-  // Close modal handler
+  // Close modal
   const handleCloseModal = () => {
     setSelectedItem(null);
     setIsModalOpen(false);
   };
 
-  // Approve a room by ID
-  const approveRoomById = (roomId) => {
-    const target = pendingData.find((item) => item.id === roomId);
-    if (!target) return;
-    setPendingData((prev) => prev.filter((item) => item.id !== roomId));
-    setActiveData((prev) => [
-      ...prev,
-      { ...target, id: `a-${Date.now()}-${roomId}`, status: "ACTIVE" }
-    ]);
-    message.success(`Duyệt phòng "${target.title}" thành công!`);
-  };
-
-  // Reject a room by ID
-  const rejectRoomById = (roomId, reason) => {
-    const target = pendingData.find((item) => item.id === roomId);
-    if (!target) return;
-    if (!reason || !reason.trim()) {
-      message.error("Vui lòng nhập lý do từ chối!");
-      return;
+  // Approve room
+  const approveRoomById = async (roomId) => {
+    try {
+      const token = localStorage.getItem("adminToken");
+      const res = await fetch(`${API_BASE_URL}/api/admin/rooms/${roomId}/moderate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ action: "APPROVE" })
+      });
+      const data = await res.json();
+      if (data.success) {
+        message.success("Phê duyệt phòng trọ thành công!");
+        setRefreshTrigger(prev => prev + 1);
+      } else {
+        message.error("Lỗi phê duyệt phòng trọ!");
+      }
+    } catch (err) {
+      console.error("Lỗi phê duyệt phòng trọ:", err);
+      message.error("Lỗi kết nối máy chủ!");
     }
-    setPendingData((prev) => prev.filter((item) => item.id !== roomId));
-    message.success(`Từ chối phòng "${target.title}" thành công!`);
   };
 
-  // Approve listing handler (Pending tab)
+  // Reject room
+  const rejectRoomById = async (roomId, reason) => {
+    try {
+      const token = localStorage.getItem("adminToken");
+      const res = await fetch(`${API_BASE_URL}/api/admin/rooms/${roomId}/moderate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ action: "REJECT", reason })
+      });
+      const data = await res.json();
+      if (data.success) {
+        message.success("Từ chối đăng tải phòng trọ thành công!");
+        setRefreshTrigger(prev => prev + 1);
+      } else {
+        message.error("Lỗi từ chối đăng tải!");
+      }
+    } catch (err) {
+      console.error("Lỗi từ chối đăng tải phòng trọ:", err);
+      message.error("Lỗi kết nối máy chủ!");
+    }
+  };
+
+  // Approve listing
   const handleApprove = () => {
     if (!selectedItem) return;
-    approveRoomById(selectedItem.id);
+    approveRoomById(selectedItem.id || selectedItem._id);
     handleCloseModal();
   };
 
-  // Reject listing handler (Pending tab)
+  // Reject listing
   const handleReject = () => {
     if (!selectedItem) return;
     if (!actionReason.trim()) {
       message.error("Vui lòng nhập lý do từ chối!");
       return;
     }
-    rejectRoomById(selectedItem.id, actionReason);
+    rejectRoomById(selectedItem.id || selectedItem._id, actionReason);
     handleCloseModal();
   };
 
-  // Keep listing handler (Reported tab)
-  const handleKeep = () => {
+  // Dismiss reports
+  const handleKeep = async () => {
     if (!selectedItem) return;
-    setReportedData((prev) => prev.filter((item) => item.id !== selectedItem.id));
-    message.success("Giữ lại phòng trọ thành công!");
+    try {
+      const token = localStorage.getItem("adminToken");
+      const res = await fetch(`${API_BASE_URL}/api/admin/rooms/${selectedItem.id || selectedItem._id}/moderate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ action: "DISMISS_REPORTS" })
+      });
+      const data = await res.json();
+      if (data.success) {
+        message.success("Bác bỏ báo cáo & Giữ lại phòng trọ thành công!");
+        setRefreshTrigger(prev => prev + 1);
+      } else {
+        message.error("Lỗi xử lý giữ lại phòng trọ!");
+      }
+    } catch (err) {
+      console.error("Lỗi giữ lại phòng trọ:", err);
+      message.error("Lỗi kết nối máy chủ!");
+    }
     handleCloseModal();
   };
 
-  // Take down listing handler (Reported tab)
-  const handleTakeDown = () => {
+  // Lock reported listing
+  const handleTakeDown = async () => {
     if (!selectedItem) return;
     if (!actionReason.trim()) {
       message.error("Vui lòng nhập lý do khóa phòng!");
       return;
     }
-    setReportedData((prev) => prev.filter((item) => item.id !== selectedItem.id));
-    message.success("Khóa phòng trọ vi phạm thành công!");
+    try {
+      const token = localStorage.getItem("adminToken");
+      const res = await fetch(`${API_BASE_URL}/api/admin/rooms/${selectedItem.id || selectedItem._id}/moderate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ action: "LOCK", reason: actionReason })
+      });
+      const data = await res.json();
+      if (data.success) {
+        message.success("Khóa phòng trọ vi phạm thành công!");
+        setRefreshTrigger(prev => prev + 1);
+      } else {
+        message.error("Lỗi khóa phòng trọ!");
+      }
+    } catch (err) {
+      console.error("Lỗi khóa phòng trọ:", err);
+      message.error("Lỗi kết nối máy chủ!");
+    }
     handleCloseModal();
   };
 
-  // Hide active listing handler
-  const handleHideActive = () => {
+  // Hide active listing
+  const handleHideActive = async () => {
     if (!selectedItem) return;
-    setActiveData((prev) =>
-      prev.map((item) =>
-        item.id === selectedItem.id ? { ...item, status: "HIDDEN" } : item
-      )
-    );
-    message.success("Đã ẩn phòng trọ thành công!");
+    try {
+      const token = localStorage.getItem("adminToken");
+      const res = await fetch(`${API_BASE_URL}/api/admin/rooms/${selectedItem.id || selectedItem._id}/moderate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ action: "HIDE" })
+      });
+      const data = await res.json();
+      if (data.success) {
+        message.success("Đã ẩn phòng trọ thành công!");
+        setRefreshTrigger(prev => prev + 1);
+      } else {
+        message.error("Lỗi ẩn phòng trọ!");
+      }
+    } catch (err) {
+      console.error("Lỗi ẩn phòng trọ:", err);
+      message.error("Lỗi kết nối máy chủ!");
+    }
     handleCloseModal();
   };
 
-  // Show active listing handler
-  const handleShowActive = () => {
+  // Show active listing
+  const handleShowActive = async () => {
     if (!selectedItem) return;
-    setActiveData((prev) =>
-      prev.map((item) =>
-        item.id === selectedItem.id ? { ...item, status: "ACTIVE" } : item
-      )
-    );
-    message.success("Đã mở hiển thị phòng trọ thành công!");
+    try {
+      const token = localStorage.getItem("adminToken");
+      const res = await fetch(`${API_BASE_URL}/api/admin/rooms/${selectedItem.id || selectedItem._id}/moderate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ action: "APPROVE" })
+      });
+      const data = await res.json();
+      if (data.success) {
+        message.success("Đã mở hiển thị phòng trọ thành công!");
+        setRefreshTrigger(prev => prev + 1);
+      } else {
+        message.error("Lỗi mở hiển thị phòng trọ!");
+      }
+    } catch (err) {
+      console.error("Lỗi hiển thị phòng trọ:", err);
+      message.error("Lỗi kết nối máy chủ!");
+    }
     handleCloseModal();
   };
 
-  // Delete active listing handler
-  const handleDeleteActive = () => {
+  // Delete active listing
+  const handleDeleteActive = async () => {
     if (!selectedItem) return;
-    setActiveData((prev) => prev.filter((item) => item.id !== selectedItem.id));
-    message.success("Đã xóa phòng trọ khỏi hệ thống!");
+    try {
+      const token = localStorage.getItem("adminToken");
+      const res = await fetch(`${API_BASE_URL}/api/admin/rooms/${selectedItem.id || selectedItem._id}/moderate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ action: "LOCK", reason: "Yêu cầu xóa từ admin" })
+      });
+      const data = await res.json();
+      if (data.success) {
+        message.success("Đã xóa phòng trọ khỏi hệ thống!");
+        setRefreshTrigger(prev => prev + 1);
+      } else {
+        message.error("Lỗi xóa phòng trọ!");
+      }
+    } catch (err) {
+      console.error("Lỗi xóa phòng trọ:", err);
+      message.error("Lỗi kết nối máy chủ!");
+    }
     handleCloseModal();
   };
 
-  // Columns definition for Pending tab
+  // Pending columns
   const pendingColumns = [
     {
       title: "Tiêu đề phòng",
@@ -532,7 +375,7 @@ function RoomModeration() {
     },
   ];
 
-  // Columns definition for Active listings tab
+  // Active columns
   const activeColumns = [
     {
       title: "Tiêu đề phòng",
@@ -592,7 +435,7 @@ function RoomModeration() {
     },
   ];
 
-  // Columns definition for Reported tab
+  // Reported columns
   const reportedColumns = [
     {
       title: "Tiêu đề phòng",
@@ -657,7 +500,61 @@ function RoomModeration() {
     },
   ];
 
-  // Tabs layout configuration
+  // Processed columns
+  const processedColumns = [
+    {
+      title: "Tiêu đề phòng",
+      dataIndex: "title",
+      key: "title",
+      render: (text) => <span className="font-semibold text-slate-700">{text}</span>,
+    },
+    {
+      title: "Hình thức đăng",
+      key: "propertyType",
+      render: (_, record) => {
+        if (record.propertyType === "COMPLEX") {
+          return (
+            <div className="flex flex-col text-left">
+              <Tag color="cyan">Dãy trọ / Tòa nhà</Tag>
+              <span className="text-[11px] text-onBackgroundLight/40 font-medium mt-1">
+                {record.propertyName}
+              </span>
+            </div>
+          );
+        }
+        return <Tag color="blue">Phòng lẻ</Tag>;
+      },
+    },
+    {
+      title: "Chủ trọ",
+      dataIndex: "hostName",
+      key: "hostName",
+    },
+    {
+      title: "Trạng thái xử lý",
+      key: "status",
+      render: (_, record) => {
+        if (record.status === "REMOVED") {
+          return <Tag color="error">Đã gỡ / Vi phạm</Tag>;
+        }
+        return <Tag color="default">Đã xóa mềm</Tag>;
+      },
+    },
+    {
+      title: "Tác vụ",
+      key: "action",
+      render: (_, record) => (
+        <button
+          onClick={() => handleOpenModal(record, "processed")}
+          className="text-techBluePrimary font-semibold hover:underline text-sm"
+        >
+          Xem chi tiết
+        </button>
+      ),
+    },
+  ];
+
+  // Tabs configuration
   const tabItems = [
     {
       key: "pendingTab",
@@ -672,9 +569,10 @@ function RoomModeration() {
       ),
       children: (
         <Table
+          loading={loading}
           dataSource={filteredPendingData}
           columns={pendingColumns}
-          rowKey="id"
+          rowKey={(record) => record._id || record.id}
           pagination={{ pageSize: 5 }}
           className="custom-premium-table"
         />
@@ -693,9 +591,10 @@ function RoomModeration() {
       ),
       children: (
         <Table
+          loading={loading}
           dataSource={filteredActiveData}
           columns={activeColumns}
-          rowKey="id"
+          rowKey={(record) => record._id || record.id}
           pagination={{ pageSize: 5 }}
           className="custom-premium-table"
         />
@@ -714,9 +613,32 @@ function RoomModeration() {
       ),
       children: (
         <Table
+          loading={loading}
           dataSource={filteredReportedData}
           columns={reportedColumns}
-          rowKey="id"
+          rowKey={(record) => record._id || record.id}
+          pagination={{ pageSize: 5 }}
+          className="custom-premium-table"
+        />
+      ),
+    },
+    {
+      key: "processedTab",
+      label: (
+        <span className="flex items-center gap-2">
+          Đã xử lý
+          <Badge
+            count={filteredProcessedData.length}
+            style={{ backgroundColor: "#94A3B8" }}
+          />
+        </span>
+      ),
+      children: (
+        <Table
+          loading={loading}
+          dataSource={filteredProcessedData}
+          columns={processedColumns}
+          rowKey={(record) => record._id || record.id}
           pagination={{ pageSize: 5 }}
           className="custom-premium-table"
         />
@@ -725,22 +647,22 @@ function RoomModeration() {
   ];
 
   return (
-    // Moderation page wrapper
+    // Moderation container
     <div className="double-bezel-outer animate-fade-in">
       <div className="double-bezel-inner p-6 bg-white/95 backdrop-blur-md">
-        {/* Header section */}
+        {/* Header */}
         <div className="mb-6">
           <h3 className="text-sm font-bold text-onBackgroundLight tracking-wider uppercase">
-            QUẢN LÝ KIỂM DUYỆT PHÒNG TRỌ
+            QUẢN LÝ KIỂM DUYỆT PHÒNG
           </h3>
           <p className="text-xs text-slate-400 font-semibold mt-1">
             Phê duyệt phòng trọ mới, quản lý phòng trọ đang hoạt động và xử lý báo cáo vi phạm từ người thuê
           </p>
         </div>
 
-        {/* Filtering toolbar in flex row */}
+        {/* Toolbar */}
         <div className="mb-6 flex flex-col md:flex-row md:items-center gap-4 bg-slate-50/50 p-4 rounded-2xl border border-slate-100 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]">
-          {/* Search text query input */}
+          {/* Search input */}
           <div className="flex-grow text-left">
             <Input
               prefix={<SearchOutlined className="text-slate-300" />}
@@ -750,47 +672,19 @@ function RoomModeration() {
               allowClear
             />
           </div>
-
-          {/* Property type filter */}
-          <div className="w-full md:w-56 text-left">
-            <Select
-              value={propertyTypeFilter}
-              onChange={(value) => setPropertyTypeFilter(value)}
-              options={[
-                { value: "ALL", label: "Tất cả hình thức" },
-                { value: "SINGLE", label: "Phòng lẻ" },
-                { value: "COMPLEX", label: "Dãy trọ / Tòa nhà" }
-              ]}
-              className="w-full"
-            />
-          </div>
-
-          {/* Structure type filter */}
-          <div className="w-full md:w-56 text-left">
-            <Select
-              value={structureFilter}
-              onChange={(value) => setStructureFilter(value)}
-              options={[
-                { value: "ALL", label: "Tất cả loại phòng" },
-                { value: "SINGLE", label: "Phòng đơn (SINGLE)" },
-                { value: "WHOLE", label: "Nguyên căn (WHOLE)" },
-                { value: "APARTMENT", label: "Căn hộ (APARTMENT)" }
-              ]}
-              className="w-full"
-            />
-          </div>
         </div>
 
-        {/* Active tabs wrapper */}
+        {/* Tabs */}
         <Tabs defaultActiveKey="pendingTab" items={tabItems} className="custom-tabs" />
 
-        {/* Details review modal */}
+        {/* Details modal */}
         <Modal
           title={
             <span className="text-sm font-bold text-onBackgroundLight tracking-wider uppercase">
-              {modalSource === "pending" && `KIỂM DUYỆT PHÒNG TRỌ`}
+              {modalSource === "pending" && `KIỂM DUYỆT PHÒNG`}
               {modalSource === "reported" && `XỬ LÝ VI PHẠM`}
               {modalSource === "active" && `QUẢN LÝ PHÒNG TRỌ ĐANG HIỂN THỊ`}
+              {modalSource === "processed" && `CHI TIẾT PHÒNG ĐÃ XỬ LÝ`}
             </span>
           }
           open={isModalOpen}
@@ -883,7 +777,7 @@ function RoomModeration() {
                 </div>
               </div>
 
-              {/* Classified Image Gallery */}
+              {/* Image gallery */}
               {selectedItem.images && selectedItem.images.length > 0 && (
                 <div className="space-y-2">
                   <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">
@@ -906,7 +800,7 @@ function RoomModeration() {
                 </div>
               )}
 
-              {/* Parent Building / Property information */}
+              {/* Property info */}
               {selectedItem.propertyType === "COMPLEX" && (
                 <div className="bg-cyan-50/30 p-4 rounded-2xl border border-cyan-100/50 space-y-2">
                   <span className="text-[10px] font-bold text-cyan-600 uppercase block tracking-wider">
@@ -931,7 +825,7 @@ function RoomModeration() {
                 </div>
               )}
 
-              {/* Sibling rooms in Complex */}
+              {/* Sibling rooms */}
               {selectedItem.propertyType === "COMPLEX" && selectedItem.propertyId && modalSource === "pending" && (
                 <div className="space-y-3 bg-slate-50/50 p-4 rounded-2xl border border-slate-100">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-2">
@@ -985,7 +879,7 @@ function RoomModeration() {
                 </div>
               )}
 
-              {/* Technical specifications grid layout */}
+              {/* Specs grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50/50 p-4 rounded-2xl border border-slate-100">
                 <div>
                   <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">LOẠI HÌNH & DIỆN TÍCH</span>
@@ -1027,7 +921,7 @@ function RoomModeration() {
                 </div>
               )}
 
-              {/* GPS Google Maps ghim embed */}
+              {/* Google Maps embed */}
               <div className="space-y-1.5 bg-slate-50/50 p-4 rounded-2xl border border-slate-100">
                 <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">
                   VỊ TRÍ BẢN ĐỒ CHI TIẾT (GOOGLE MAPS PIN)
