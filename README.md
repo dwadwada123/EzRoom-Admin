@@ -1,14 +1,15 @@
 # EzRoom Admin Web
 
-Trang web quản trị dành cho Quản trị viên (Admin) của hệ thống EzRoom, được xây dựng bằng React, Vite, Tailwind CSS và Ant Design.
+Trang web quản trị dành cho Quản trị viên (Admin) của hệ thống EzRoom, được xây dựng bằng React 19, Vite, Tailwind CSS, Ant Design và Recharts.
 
 ## 1. Công nghệ sử dụng
 
-- React 19
-- Vite (Công cụ đóng gói và phát triển frontend nhanh)
-- Tailwind CSS (Thiết kế giao diện hiện đại)
-- Ant Design & Lucide React (Bộ icon và thành phần UI quản trị)
-- Axios (Giao tiếp RESTful API)
+- React 19 (Thư viện giao diện người dùng)
+- Vite 8 (Công cụ đóng gói và phát triển frontend tối ưu)
+- Tailwind CSS 3 (Khung định kiểu giao diện hiện đại)
+- Ant Design 6 & @ant-design/icons (Bộ thành phần UI và biểu tượng quản trị chuyên nghiệp)
+- Recharts 3 (Thư viện vẽ biểu đồ phân tích doanh thu và số liệu trực quan)
+- Fetch API (Giao tiếp RESTful API thông qua module cấu hình tập trung `src/config/api.js`)
 
 ## 2. Yêu cầu hệ thống
 
@@ -50,7 +51,7 @@ Thư mục `dist/` sẽ được tạo ra chứa mã nguồn tối ưu hóa, s�
 
 ## 4. Các phân hệ chức năng chính của Quản trị viên
 
-- Bảng điều khiển (Dashboard): Thống kê tổng doanh thu nền tảng, số phòng đang hoạt động, số người dùng và biểu đồ phân tích biến động theo tuần/tháng.
+- Bảng điều khiển (Dashboard): Thống kê tổng doanh thu nền tảng, số phòng đang hoạt động, số người dùng và biểu đồ phân tích biến động theo tuần/tháng bằng Recharts.
 - Duyệt định danh eKYC: Xem xét hồ sơ xác thực danh tính của Chủ nhà (ảnh CCCD mặt trước, mặt sau và chân dung selfie), thực hiện phê duyệt hoặc từ chối kèm lý do.
 - Kiểm duyệt phòng: Rà soát danh sách tin đăng phòng trọ mới, khóa hoặc gỡ bỏ các bài đăng có dấu hiệu vi phạm quy định nền tảng.
 - Lịch sử giao dịch: Theo dõi toàn bộ dòng tiền bao gồm thanh toán tiền cọc Escrow, thanh toán hóa đơn hàng tháng và các giao dịch giải ngân cho chủ trọ.
